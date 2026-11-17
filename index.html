@@ -293,7 +293,7 @@ ul.plain li { margin: 4px 0; font-size: 14.5px; }
     <div>
       <div class="pill">NFL Week 10 · Nov. 12–16, 2026</div><div id="cloudBadge" style="float:right;margin-top:2px"></div>
       <h1>Start/Sit Lab: Week 10</h1>
-      <p class="sub">Lineups, matchup grades, usage, trades and your whole league in one place. Data as of late Monday, Nov. 16. Every Week 10 game is final. Monday night (Chargers 23, Ravens 20) is entered from the box score for the main fantasy players (Herbert, Hampton, Harris, Henry, Flowers, Andrews, Brissett; McConkey did not play) and marked provisional; the rest of that game’s players, both kickers and defenses, plus snaps and season tables for those two teams, update when the official stat feed posts Tuesday morning. Week 11 matchups, lines, injuries and weather load after that.</p>
+      <p class="sub">Lineups, matchup grades, usage, trades and your whole league in one place. <span id="buildStamp" class="tag" style="background:var(--surface-2);border:1px solid var(--line)">build Nov 17, 05:13</span> Data as of late Monday, Nov. 16. Every Week 10 game is final. Monday night (Chargers 23, Ravens 20) is entered from the box score for the main fantasy players (Herbert, Hampton, Harris, Henry, Flowers, Andrews, Brissett; McConkey did not play) and marked provisional; the rest of that game’s players, both kickers and defenses, plus snaps and season tables for those two teams, update when the official stat feed posts Tuesday morning. Week 11 matchups, lines, injuries and weather load after that.</p>
     </div>
     <button class="theme-btn" id="themeBtn" type="button">Switch theme</button>
   </header>
@@ -321,7 +321,8 @@ ul.plain li { margin: 4px 0; font-size: 14.5px; }
   <section id="tab-report" hidden></section>
 
   <footer class="sources panel">
-    <h3>How the numbers work</h3>
+    <div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">How the numbers work</h3><button class="btn ghost small" type="button" id="methodToggle" aria-expanded="false" aria-controls="methodBody">Show</button></div>
+    <div id="methodBody" hidden>
     <ul class="note">
       <li><b>Matchup grade (0–100).</b> Half-PPR points each defense allows to that position (through Week 9) versus league average, blended 50/50 with the team’s Vegas implied points this week. 50 is neutral.</li>
       <li><b>Projection.</b> Season PPR points per game, adjusted by matchup and game environment (0.4 weight each), then by weather (passing game only: −2% to −4% in wind or rain) and by any role change I could source (for example, the target vacuum left by an injured teammate). The injury switch multiplies by a chance-to-play: questionable 75%, doubtful 20%, limited practice 92%, out 0%.</li>
@@ -362,6 +363,7 @@ ul.plain li { margin: 4px 0; font-size: 14.5px; }
       <li><b>Not available:</b> a full player-by-team history log. The few previous-meeting notes I found are shown under each player’s details; use the custom add form for any player I left out.</li>
       <li>Sources: nflverse (weekly stats, snap counts and play-by-play), DeepMetrics, FantasyData, 4for4 (red-zone rushing), NFL.com (team passing volume), Edgehalla (season points, snaps, target share), Stat Sniper, FF Beacon, Footballguys, Razzball, Edgely/DraftKings, FantasyTools.ai, Fantasy Footballers, Razzball, Yahoo Sports, CBS Sports, DK Network, Forbes, FantasyLife, Pride of Detroit, Patriots.com, Sharp Football, and weather pages from NFLWeather, FootballDB, RotoWire and Sharp (Nov. 10–12). Forecasts change; recheck Sunday morning.</li>
     </ul>
+    </div>
   </footer>
 </div>
 
@@ -1469,7 +1471,7 @@ function recentLine(p, ev) {
   else if (p.pos === "WR" || p.pos === "TE") u.push(f1(rf.tpg) + " targets and " + f1(rf.rpg) + " catches a game");
   if (rf.snap != null) u.push("snaps " + Math.round(rf.snap) + "%" + (SNAP[p.id] && SNAP[p.id].snap != null ? " (season " + SNAP[p.id].snap + "%)" : ""));
   if (u.length) bits.push("Recent usage: " + u.join("; ") + ".");
-  if (ev && ev.projR != null && !ev.bye && !ev.out) bits.push("Recent-form projection this week: <b>" + f1(ev.projR) + "</b> vs " + f1(ev.projS) + " season-based" + (state.basis !== "season" ? "; lineups use the " + basisLabel() + " (" + f1(ev.proj) + ")" : "") + ".");
+  if (ev && ev.projR != null && !ev.bye && !ev.out && !ev.final) bits.push("Recent-form projection this week: <b>" + f1(ev.projR) + "</b> vs " + f1(ev.projS) + " season-based" + (state.basis !== "season" ? "; lineups use the " + basisLabel() + " (" + f1(ev.proj) + ")" : "") + ".");
   return bits.join(" ");
 }
 var PRIOR = { QB:14, RB:8, WR:7, TE:5, K:8, DST:5 };
@@ -1533,7 +1535,7 @@ function details(ev) {
   var gl = gtLine(p); if (gl) lines.push(gl);
   var tl = trendLine(p); if (tl) lines.push(tl);
   var fcL = floorCeil(ev); if (fcL && !fcL.final) lines.push("<b>Range this week:</b> floor " + f1(fcL.lo) + ", ceiling " + f1(fcL.hi) + " (his 20th and 80th-percentile weeks scaled to the projection); busts in " + Math.round(fcL.bust * 100) + "% of games, booms in " + Math.round(fcL.boom * 100) + "%.");
-  var ml = marketLine(p); if (ml) lines.push(ml);
+  if (TAGMODE !== "ranks") { var ml = marketLine(p); if (ml) lines.push(ml); }
   var vl = valueLine(p); if (vl) lines.push(vl.replace("<b>Trade value:</b>", "<b>Model value:</b>"));
   lines.push(usageGrid(p, ev));
   var u2 = USAGE[p.id];
@@ -1622,7 +1624,7 @@ function renderLineup() {
   h += '</div><div class="row" style="margin-top:12px"><button class="btn ghost small" id="clearBtn" type="button">Clear roster</button><button class="btn ghost small" id="exBtn" type="button">Load example</button></div>';
   h += '<details id="addMore" style="margin-top:14px"><summary>Player not listed? Add any NFL player</summary><p class="note" style="margin-top:8px">Enter a name, team and position. Points per game is optional: if you leave it blank, an average for the position is used and the player is tagged as an estimate.</p><div class="row" style="margin-top:10px">';
   h += '<div class="grow"><label for="cName">Name</label><input type="text" id="cName"></div>';
-  h += '<div style="width:96px"><label for="cTeam">Team</label><select id="cTeam">' + Object.keys(TEAM_NAMES).map(function (t) { return '<option>' + t + '</option>'; }).join("") + '</select></div>';
+  h += '<div style="width:96px"><label for="cTeam">Team</label><select id="cTeam">' + Object.keys(TEAM_NAMES).sort().map(function (t) { return '<option>' + t + '</option>'; }).join("") + '</select></div>';
   h += '<div style="width:90px"><label for="cPos">Position</label><select id="cPos"><option>QB</option><option>RB</option><option selected>WR</option><option>TE</option><option>K</option><option>DST</option></select></div>';
   h += '<div style="width:110px"><label for="cPpg">PPR pts/game</label><input type="number" id="cPpg" step="0.1" min="0" placeholder="optional"></div><button class="btn" id="cBtn" type="button">Add</button></div><div style="margin-top:14px"><label for="bulk">Add many at once. One player per line: Name, TEAM, POS, optional points per game</label><textarea id="bulk" rows="5" placeholder="Tyler Allgeier, ATL, RB&#10;Jauan Jennings, MIN, WR, 9.5" style="width:100%;font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 10px"></textarea><div class="row" style="margin-top:8px"><button class="btn" id="bulkBtn" type="button">Add all</button><span class="note" id="bulkMsg" role="status"></span></div></div></details></div>';
 
@@ -1696,7 +1698,7 @@ function renderLineup() {
                             : '<span class="verdict-sit">Sit</span><div class="muted small">' + f1(Math.abs(gap)) + ' behind ' + esc(weakest.ev.p.name) + '</div>';
         } else call = '<span class="verdict-sit">Sit</span>';
       }
-      h += '<tr class="sitrow"><td>' + playerCell(e) + '</td><td>' + oppText(e) + (e.bye ? '' : '<div class="muted small">' + e.kickoff + '</div>') + '</td><td>' + (e.bye || e.out ? '<span class="muted">n/a</span>' : chip(e.rating)) + '</td>' +
+      h += '<tr class="sitrow"><td>' + playerCell(e) + '</td><td>' + oppText(e) + (e.bye ? '' : (e.final ? '' : '<div class="muted small">' + e.kickoff + '</div>')) + '</td><td>' + (e.bye || e.out ? '<span class="muted">n/a</span>' : chip(e.rating)) + '</td>' +
            '<td class="num">' + f1(scoredPpg(e.p)) + '</td><td class="num">' + (e.bye || e.out ? '–' : '<b>' + fv(e) + '</b>') + '</td><td>' + call + '</td></tr>';
     });
     h += '</tbody></table></div>';
@@ -1894,7 +1896,7 @@ function renderUsage() {
   }
   function matchupCell(e) {
     if (e.bye) return '<span class="muted">Bye</span>';
-    var who = '<div class="muted small" style="margin-top:3px;white-space:nowrap">' + (e.home ? 'vs ' : 'at ') + teamBadge(e.opp) + esc(TEAM_NAMES[e.opp] || e.opp) + (e.defRank ? ' · #' + e.defRank + ' vs ' + e.p.pos + 's' : '') + '</div>';
+    var who = e.defRank ? '<div class="muted small" style="margin-top:3px;white-space:nowrap">#' + e.defRank + ' defense vs ' + e.p.pos + 's</div>' : '';
     return (e.out ? '<span class="muted">Out</span>' : chip(e.rating)) + who;
   }
   var el = $("#tab-usage"), pos = state.uPos;
@@ -2756,7 +2758,7 @@ var STATS = [
   { g: "Season", id: "tval", label: "Market trade value (FantasyCalc, real trades)", fn: function (p) { var v = marketValue(p); return v == null ? { v: null, t: "–" } : { v: v, t: marketChip(p) + ' <span class="muted small">model ' + (valueScore(p) == null ? '–' : valueScore(p)) + '</span>' }; } }
 ];
 function usageGrid(p, ev) {
-  var items = STATS.filter(function (s) { return s.g === "Usage" || s.g === "Game script" || s.id === "gp" || s.id === "ros" || s.id === "sos" || s.id === "po"; }).map(function (s) { var r = s.fn(p, ev); return { s: s, r: r }; }).filter(function (x) { return x.r.v != null && x.r.t && x.r.t !== "–"; });
+  var items = STATS.filter(function (s) { return s.g === "Usage" || s.id === "gp" || s.id === "ros" || s.id === "sos" || s.id === "po"; }).map(function (s) { var r = s.fn(p, ev); return { s: s, r: r }; }).filter(function (x) { return x.r.v != null && x.r.t && x.r.t !== "–"; });
   if (!items.length) return "";
   return '<div class="ugrid-title"><b>Usage and season</b> <span class="muted small">(season through Week 9; routes through Week 8)</span></div><div class="ugrid">' + items.map(function (x) { return '<div class="ucell"><div class="k">' + esc(x.s.label.replace(/ \(.*\)$/, "")) + '</div><div class="v">' + x.r.t + '</div></div>'; }).join("") + '</div>';
 }
@@ -3225,7 +3227,7 @@ function renderWaivers(evs) {
     var beats = kind === "avail" && cmp && (mode === "week" ? (!e.bye && !e.out && e.val > cmp.val + 0.5) : rosTotal(p) > rosTotal(cmp.p) + 3);
     var style = kind === "mine" ? ' style="background:color-mix(in srgb, var(--accent) 7%, var(--surface))"' : beats ? ' style="background:color-mix(in srgb, #0b7a5c 10%, var(--surface))"' : '';
     return '<tr' + style + '><td><div class="name">' + (kind === "mine" ? '<span class="tag" style="background:var(--surface-2);border:1px solid var(--line)">YOURS</span> ' : beats ? '<span class="tag hot">upgrade</span> ' : '') + posBadge(p.pos) + '<span class="pn">' + esc(p.name) + ' ' + teamBadge(p.team) + '</span>' + injTag(e.inj) + usageTag(p) + trendTag(p) + gtTag(p) + '</div></td>' +
-      '<td>' + (e.bye ? '<span class="muted">Bye</span>' : oppText(e) + '<div class="muted small">' + e.kickoff + '</div>') + '</td><td>' + (e.bye || e.out ? '<span class="muted">n/a</span>' : chip(e.rating)) + (e.defRank ? '<div class="muted small">#' + e.defRank + ' vs ' + p.pos + 's</div>' : '') + '</td>' +
+      '<td>' + (e.bye ? '<span class="muted">Bye</span>' : oppText(e) + (e.final ? '' : '<div class="muted small">' + e.kickoff + '</div>')) + '</td><td>' + (e.bye || e.out ? '<span class="muted">n/a</span>' : chip(e.rating)) + (e.defRank ? '<div class="muted small">#' + e.defRank + ' vs ' + p.pos + 's</div>' : '') + '</td>' +
       '<td class="num"><b>' + (e.bye ? 'BYE' : e.out ? 'OUT' : fv(e)) + '</b></td><td class="num">' + f1(scoredPpg(p)) + '</td><td class="num">' + (rf ? f1(rf.rawAvg) : '<span class="na">–</span>') + '</td>' +
       (cols ? '<td class="num">' + (rf ? f1(pos === "RB" ? rf.cpg + rf.rpg : rf.tpg) : '<span class="na">–</span>') + '</td><td class="num">' + (sn && sn.snap != null ? sn.snap + '%' : '<span class="na">–</span>') + '</td>' + (pos !== "RB" ? '<td class="num">' + (w && w.tgt != null ? Math.round(w.tgt) + '%' : '<span class="na">–</span>') + '</td><td class="num">' + (w && w.rr != null ? (w.rrEst ? '≈' : '') + w.rr.toFixed(2) : '<span class="na">–</span>') + '</td>' : '<td class="num">' + (rb && rb.share != null ? Math.round(rb.share * 100) + '%' : '<span class="na">–</span>') + '</td><td class="num">' + (rz ? rz[3] + ' (' + rz[4] + ' TD)' : '<span class="na">–</span>') + '</td>') : '') +
       '<td class="num">' + f1(rosTotal(p)) + '</td><td class="num">' + marketChip(p) + '</td><td class="small" style="min-width:260px;max-width:420px">' + (kind === "avail" ? waiverReason(e, beats ? cmp : null) : (e.out ? 'Ruled out this week.' : e.bye ? 'On bye.' : esc(why(e)).slice(0, 220))) + '</td><td style="min-width:170px">' + (kind === "avail" && myAll.length ? dropText(bestDrop(myAll, e.p), e.p) : '') + '</td></tr>';
@@ -3790,7 +3792,7 @@ function renderRbShare(el) {
   if (w !== "season" && weeks.indexOf(parseInt(w, 10)) < 0) { w = "season"; state.rbWeek = "season"; }
   var col = TEAM_COLORS[team] || ["#334155", "#94a3b8"];
   var h = '<div class="panel"><div class="row" style="justify-content:space-between"><div><h2>Running back rush attempts</h2><p class="note">Who gets the carries. The ring splits a team’s running-back carries among its backs; the number in the middle is the backs’ total attempts (the team’s overall total, including quarterback and receiver runs, is noted under it), and the table lists each back’s attempts and share.</p></div></div>';
-  h += '<div class="row" style="margin-top:8px;align-items:flex-end"><div style="width:220px"><label for="rbTeam">Team</label><select id="rbTeam">' + teams.map(function (t) { return '<option value="' + t + '"' + (t === team ? ' selected' : '') + '>' + esc(TEAM_NAMES[t] || t) + '</option>'; }).join("") + '</select></div><div><label>Week</label><div class="seg" role="group"><button type="button" data-rbw="season" aria-pressed="' + (w === "season") + '">Season</button>' + weeks.map(function (k) { return '<button type="button" data-rbw="' + k + '" aria-pressed="' + (String(w) === String(k)) + '">' + k + '</button>'; }).join("") + '</div></div></div>';
+  h += '<div class="row" style="margin-top:8px;align-items:flex-end"><div style="width:220px"><label for="rbTeam">Team</label><select id="rbTeam">' + teams.map(function (t) { return '<option value="' + t + '"' + (t === team ? ' selected' : '') + '>' + t + ' · ' + esc(TEAM_NAMES[t] || t) + '</option>'; }).join("") + '</select></div><div><label>Week</label><div class="seg" role="group"><button type="button" data-rbw="season" aria-pressed="' + (w === "season") + '">Season</button>' + weeks.map(function (k) { return '<button type="button" data-rbw="' + k + '" aria-pressed="' + (String(w) === String(k)) + '">' + k + '</button>'; }).join("") + '</div></div></div>';
   // gather carries
   var rbs = allPlayers().filter(function (p) { return p.pos === "RB" && (p.team === team || (WK[p.id] || []).length); });
   var items = {}, totalTeam = 0, wkList = w === "season" ? weeks : [parseInt(w, 10)];
@@ -3882,7 +3884,7 @@ function renderPassShare(el) {
   var weeks = []; for (var k = 1; k <= 10; k++) if (SCHEDULE[team] && SCHEDULE[team][k - 1] && teamPassStat(team, k, 4) != null) weeks.push(k);
   if (w !== "season" && weeks.indexOf(parseInt(w, 10)) < 0) { w = "season"; state.psWeek = "season"; }
   var h = '<div class="panel"><div class="row" style="justify-content:space-between"><div><h2>Pass catcher usage</h2><p class="note">Who the ball goes to. The first ring splits the team’s targets among everyone who was thrown to, with the team’s pass attempts in the middle; the second splits the catches, with the team’s completions in the middle. Each player keeps the same colour across weeks and both rings.</p></div></div>';
-  h += '<div class="row" style="margin-top:8px;align-items:flex-end"><div style="width:220px"><label for="psTeamSel">Team</label><select id="psTeamSel">' + teams.map(function (t) { return '<option value="' + t + '"' + (t === team ? ' selected' : '') + '>' + esc(TEAM_NAMES[t] || t) + '</option>'; }).join("") + '</select></div><div><label>Week</label><div class="seg" role="group"><button type="button" data-psw="season" aria-pressed="' + (w === "season") + '">Season</button>' + weeks.map(function (k) { return '<button type="button" data-psw="' + k + '" aria-pressed="' + (String(w) === String(k)) + '">' + k + '</button>'; }).join("") + '</div></div></div>';
+  h += '<div class="row" style="margin-top:8px;align-items:flex-end"><div style="width:220px"><label for="psTeamSel">Team</label><select id="psTeamSel">' + teams.map(function (t) { return '<option value="' + t + '"' + (t === team ? ' selected' : '') + '>' + t + ' · ' + esc(TEAM_NAMES[t] || t) + '</option>'; }).join("") + '</select></div><div><label>Week</label><div class="seg" role="group"><button type="button" data-psw="season" aria-pressed="' + (w === "season") + '">Season</button>' + weeks.map(function (k) { return '<button type="button" data-psw="' + k + '" aria-pressed="' + (String(w) === String(k)) + '">' + k + '</button>'; }).join("") + '</div></div></div>';
   var wkList = w === "season" ? weeks : [parseInt(w, 10)], att = 0, comp = 0; wkList.forEach(function (k) { att += teamPassStat(team, k, 4) || 0; comp += teamPassStat(team, k, 5) || 0; });
   var items = {}, seasonTg = {};
   allPlayers().forEach(function (p) { if (!SKILL[p.pos]) return; (WK[p.id] || []).forEach(function (r) { if (!SCHEDULE[team] || SCHEDULE[team][r[0] - 1] !== r[5]) return; if (p.team !== team && !(r[4] > 0)) return; if (weeks.indexOf(r[0]) >= 0 && r[4] > 0) seasonTg[p.id] = (seasonTg[p.id] || 0) + r[4]; if (wkList.indexOf(r[0]) < 0 || !(r[4] > 0 || r[3] > 0)) return; var it = items[p.id] = items[p.id] || { p: p, tg: 0, rec: 0 }; it.tg += r[4]; it.rec += r[3]; }); });
@@ -4288,6 +4290,7 @@ var _frzTimer = null;
 function scheduleFreeze() { if (_frzTimer) cancelAnimationFrame(_frzTimer); _frzTimer = requestAnimationFrame(function () { _frzTimer = null; freezeNameColumns(); }); }
 if (typeof MutationObserver !== "undefined") { new MutationObserver(function (muts) { for (var i = 0; i < muts.length; i++) { if (muts[i].type === "childList") { scheduleFreeze(); return; } } }).observe(document.body, { childList: true, subtree: true }); }
 window.addEventListener("resize", scheduleFreeze);
+(function () { var b = document.getElementById("methodToggle"), body = document.getElementById("methodBody"); if (b && body) b.onclick = function () { var open = body.hidden; body.hidden = !open; b.textContent = open ? "Hide" : "Show"; b.setAttribute("aria-expanded", String(open)); }; })();
 function showTab(t) {
   state.tab = t; renderClaim();
   ["lineup","players","usage","pstats","matchups","sos","trade","league","report"].forEach(function (k) { $("#tab-" + k).hidden = k !== t; $("#t-" + k).setAttribute("aria-selected", String(k === t)); });
