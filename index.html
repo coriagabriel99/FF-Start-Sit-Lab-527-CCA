@@ -356,6 +356,20 @@ ul.plain li { margin: 4px 0; font-size: 14.5px; }
   .seg[aria-label="Week"] { flex-wrap: wrap; }
   .seg[aria-label="Week"] button { padding: 6px 9px; }
 }
+.sheet { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 60; display: flex; align-items: flex-end; }
+.sheet .sheet-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.sheet .sheet-body { padding: 10px 14px 18px; overflow: auto; max-height: calc(70vh - 48px); font-size: 13.5px; }
+.sheet > * { background: var(--surface); }
+.sheet .sheet-bar, .sheet .sheet-body { width: 100%; }
+.sheet .dl { margin: 6px 0; }
+.sheet .ugrid { grid-template-columns: 1fr 1fr; }
+body.sheet-open { overflow: hidden; }
+@media (max-width: 720px) {
+  .sheet { flex-direction: column; justify-content: flex-end; }
+  .sheet .sheet-bar { border-radius: 14px 14px 0 0; }
+  .tablewrap details.more summary { font-size: 12.5px; }
+  .tablewrap details.more summary .muted { display: none; }
+}
 @media (max-width: 420px) {
   .tabs.groups { grid-template-columns: repeat(3, 1fr); }
   .tabs.groups button b { font-size: 13px; }
@@ -372,7 +386,7 @@ ul.plain li { margin: 4px 0; font-size: 14.5px; }
       <p class="sub" tabindex="0" onclick="this.classList.toggle('open')">Lineups, matchup grades, usage, trades and your whole league in one place. Week 11 (Nov. 19–23). Data as of Tuesday, Nov. 17: season averages, usage, recent form, garbage-time splits, kicker and defense scores and defense-vs-position grades run through Week 10 (nflverse); Week 10 lineups and results are in League → History and Week recap, and its projection accuracy is under Player ranks → Accuracy. Week 11 opening spreads and totals are in; the first practice reports land Wednesday and weather forecasts firm up Thursday–Friday, both of which will update the injury list and the projections. Byes: ATL, CLE, GB, LAR, NE, SEA.</p>
     </div>
   </header>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 17, 16:22</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 17, 16:34</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -1609,7 +1623,7 @@ function details(ev) {
   if (p.pos === "DST") lines.push("<b>Season:</b> " + f1(p.ppg) + " points per game over " + p.gp + " games.");
   if (ev.wx && !ev.future) lines.push("<b>Weather:</b> " + esc(ev.wx.t));
   if (ev.inj && state.risk && !ev.out) lines.push("<b>Projection if fully healthy:</b> " + f1(ev.proj));
-  return '<details class="more"><summary>Details <span class="muted small">(usage, matchup, schedule, weather)</span></summary>' + lines.map(function (l) { return '<div class="dl">' + l + '</div>'; }).join("") + '</details>';
+  return '<details class="more" data-player="' + esc(p.name) + '"><summary>Details <span class="muted small">(usage, matchup, schedule, weather)</span></summary><div class="morebody">' + lines.map(function (l) { return '<div class="dl">' + l + '</div>'; }).join("") + '</div></details>';
 }
 function opp2(t) { return TEAM_NAMES[t] || t; }
 function playerCell(ev) {
@@ -2239,7 +2253,7 @@ var SOS = {};
 (function () {
   ["QB","RB","WR","TE"].forEach(function (pos) {
     var teams = Object.keys(DEF);
-    var rows = teams.map(function (t) { return { t: t, idx: rosIndex(t, pos, 10, ROS_END), po: rosIndex(t, pos, 15, 17) }; });
+    var rows = teams.map(function (t) { return { t: t, idx: rosIndex(t, pos, CUR, ROS_END), po: rosIndex(t, pos, 15, 17) }; });
     rows.slice().sort(function (a, b) { return b.idx - a.idx; }).forEach(function (r, k) { r.rank = k + 1; });
     rows.slice().sort(function (a, b) { return b.po - a.po; }).forEach(function (r, k) { r.poRank = k + 1; });
     rows.forEach(function (r) { SOS[r.t] = SOS[r.t] || {}; SOS[r.t][pos] = r; });
@@ -2593,7 +2607,7 @@ function renderSuggestions(partner) {
   if (lockedCount) h += '<div style="margin-top:8px"><label class="switch"><input type="checkbox" id="exLock"' + (state.excludeLocked !== false ? ' checked' : '') + '> Leave out players whose Week ' + CUR + ' game is already final (' + lockedCount + ' so far); most platforms lock them until the week ends</label></div>';
   h += '<div class="seg" role="group" aria-label="Suggestion kind" style="margin-top:10px">' + [["browse","Browse deals"],["buy","Buy a player"],["sell","Sell a player"],["upgrade","Upgrade a position"]].map(function (k) { return '<button type="button" data-sk="' + k[0] + '" aria-pressed="' + (state.sugKind === k[0]) + '">' + k[1] + '</button>'; }).join("") + '</div>';
   if (state.sugKind === "upgrade") {
-    h += '<div class="row" style="margin-top:10px"><div><label>Position to upgrade</label><div class="seg" role="group">' + ["QB","RB","WR","TE"].map(function (ps) { return '<button type="button" data-upos="' + ps + '" aria-pressed="' + (state.upPos === ps) + '">' + ps + '</button>'; }).join("") + '</div></div><div><label>Goal</label><div class="seg" role="group"><button type="button" data-uhor="ros" aria-pressed="' + (state.upHorizon !== "po") + '">Rest of season (Weeks 10–' + ROS_END + ')</button><button type="button" data-uhor="po" aria-pressed="' + (state.upHorizon === "po") + '">Fantasy playoffs (Weeks 15–17)</button></div></div></div>';
+    h += '<div class="row" style="margin-top:10px"><div><label>Position to upgrade</label><div class="seg" role="group">' + ["QB","RB","WR","TE"].map(function (ps) { return '<button type="button" data-upos="' + ps + '" aria-pressed="' + (state.upPos === ps) + '">' + ps + '</button>'; }).join("") + '</div></div><div><label>Goal</label><div class="seg" role="group"><button type="button" data-uhor="ros" aria-pressed="' + (state.upHorizon !== "po") + '">Rest of season (Weeks ' + CUR + '–' + ROS_END + ')</button><button type="button" data-uhor="po" aria-pressed="' + (state.upHorizon === "po") + '">Fantasy playoffs (Weeks 15–17)</button></div></div></div>';
     var ups = upgradeOptions(state.upPos || "RB", state.upHorizon === "po" ? "po" : "ros");
     h += '<p class="note" style="margin-top:8px">Players at ' + esc(state.upPos || "RB") + (state.teams.length ? ' on your leaguemates’ rosters' : ' across the league') + ' who would raise your projected best lineup over the chosen window, each paired with the offer from your roster that is realistic on market value (85–135% of his value, with the 2-for-1 premium and the best-player rule). Gain is per week over the window' + (state.upHorizon === "po" ? ', so a player who returns from injury by Week 15 counts in full' : '') + '.</p>';
     if (!ups.length) h += '<div class="empty" style="margin-top:10px">No realistic ' + esc(state.upPos || "RB") + ' upgrade found for that window. Try the other goal, another position, or add leaguemates’ rosters.</div>';
@@ -3076,7 +3090,7 @@ function renderTradeTargets(evs) {
   renderTradeTargets.last = deals.slice(0, 20);
   if (!deals.length) h += '<div class="empty" style="margin-top:10px">No value-fair upgrade found. Your surplus does not carry enough trade value to land an upgrade without overpaying.' + (state.teams.length ? '' : ' Try the Trades tab for lopsided or overpay options.') + '</div>';
   else {
-    h += '<div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Target</th>' + (state.teams.length ? '<th>Owner</th>' : '') + '<th>Realistic offer from you</th><th class="num" title="Trade value sent → received">Value</th><th class="num" title="Change in your projected best lineup per week, Weeks 10–' + ROS_END + '">You gain</th><th></th></tr></thead><tbody>';
+    h += '<div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Target</th>' + (state.teams.length ? '<th>Owner</th>' : '') + '<th>Realistic offer from you</th><th class="num" title="Trade value sent → received">Value</th><th class="num" title="Change in your projected best lineup per week, Weeks ' + CUR + '–' + ROS_END + '">You gain</th><th></th></tr></thead><tbody>';
     renderTradeTargets.last.forEach(function (x, i) { h += '<tr><td>' + sugName(x.get) + ' <span class="muted small">' + marketChip(x.get[0]) + '</span></td>' + (state.teams.length ? '<td>' + ownerLabel(x.team) + '</td>' : '') + '<td>' + sugName(x.give) + '</td><td class="num">' + x.vg + ' → ' + x.vr + '</td><td class="num" style="color:#0b7a5c">+' + f1(x.me) + '</td><td><button type="button" class="btn small" data-ttload="' + i + '">Open in Trades</button></td></tr>'; });
     h += '</tbody></table></div>';
   }
@@ -3204,7 +3218,7 @@ function quickSide(ids) {
 function renderQuickCompare() {
   var A = quickSide(state.qa || []), B = quickSide(state.qb || []), all = allPlayers();
   var h = '<details class="more panel" style="margin-top:14px"' + ((state.qa || []).length || (state.qb || []).length ? ' open' : '') + '><summary><b>Compare players</b> <span class="muted small">(any players, no rosters involved: grade plus rest-of-season points)</span></summary>';
-  h += '<p class="note" style="margin-top:8px">Put any players on each side. The grade comes from rest-of-season points over a replacement starter per week (so two mediocre players do not add up to a star) with the market check beside it; the table shows each player’s projected fantasy points for Weeks 10–' + ROS_END + ' with injuries and byes built in, and the chart compares the two sides week by week.</p>';
+  h += '<p class="note" style="margin-top:8px">Put any players on each side. The grade comes from rest-of-season points over a replacement starter per week (so two mediocre players do not add up to a star) with the market check beside it; the table shows each player’s projected fantasy points for Weeks ' + CUR + '–' + ROS_END + ' with injuries and byes built in, and the chart compares the two sides week by week.</p>';
   h += '<datalist id="plistQ">' + all.filter(function (p) { return SKILL[p.pos]; }).map(function (p) { return '<option value="' + esc(p.name) + ' (' + p.team + ' ' + p.pos + ')">'; }).join("") + '</datalist>';
   function sideBox(key, label, S) {
     return '<div><label for="q' + key + 'In">' + label + '</label><div class="row"><div class="grow"><input type="text" id="q' + key + 'In" list="plistQ" placeholder="Type a player" autocomplete="off"></div><button class="btn small" type="button" id="q' + key + 'Add">Add</button></div><div class="rostergrid" style="margin-top:6px">' + (S.ps.length ? S.ps.map(function (p) { return '<span class="rchip">' + posBadge(p.pos) + '<span class="pn">' + esc(p.name) + ' ' + teamBadge(p.team) + '</span>' + injTag(INJ[p.id]) + '<button type="button" data-qrm="' + key + ':' + esc(p.id) + '" aria-label="Remove">×</button></span>'; }).join("") : '<span class="note">Nobody yet.</span>') + '</div></div>';
@@ -3217,7 +3231,7 @@ function renderQuickCompare() {
     h += '<div class="grid2" style="margin-top:12px"><div class="panel"><div class="muted small">Grade for Side A’s manager (you)</div><div style="margin:6px 0">' + gradeChip(gMe) + '</div><p><b>' + (Math.abs(d) < 0.25 ? 'Even on starter value.' : d > 0 ? 'You gain about ' + f1(d) + ' points a week of starter value.' : 'You give up about ' + f1(Math.abs(d)) + ' points a week of starter value.') + '</b></p><p class="note" style="margin-top:6px">Rest of season: you send ' + f1(A.tot.pts) + ' projected fantasy points (' + f1(A.tot.vor) + ' over replacement) and get back ' + f1(B.tot.pts) + ' (' + f1(B.tot.vor) + ' over replacement).</p></div>';
     h += '<div class="panel"><div class="muted small">Grade for Side B’s manager</div><div style="margin:6px 0">' + gradeChip(gThem) + '</div><p><b>' + (ratio == null ? 'No market value for one side.' : ratio >= 0.9 && ratio <= 1.2 ? 'Fair on market value.' : ratio < 0.9 ? 'They give up more market value than they get (' + B.tot.mkt + ' for ' + A.tot.mkt + ').' : 'They come out ahead on market value (' + A.tot.mkt + ' for ' + B.tot.mkt + ').') + '</b></p><p class="note" style="margin-top:6px">Market value (FantasyCalc, real trades): you send ' + A.tot.mkt + ', get ' + B.tot.mkt + (prem !== 1 ? '; a ' + Math.round(Math.abs(prem - 1) * 100) + '% consolidation premium applies to the side sending more players' : '') + '. ' + (ratio != null && (ratio < 0.85 || !bestPlayerOK(A.ps, B.ps)) ? 'Most managers would not accept this as drawn.' : 'Realistic by the market test.') + '</p></div></div>';
     function ptable(label, S) {
-      var t = '<div class="panel" style="margin-top:12px"><h3>' + label + '</h3><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num" title="Games left after byes and injury timelines">Games</th><th class="num" title="Projected fantasy points, Weeks 10–' + ROS_END + '">ROS pts</th><th class="num" title="Points over a replacement starter">Over repl.</th><th class="num">Per game</th><th class="num" title="FantasyCalc market value">Market</th><th class="num" title="This tool’s 0–100 value">Value</th><th>Status</th></tr></thead><tbody>';
+      var t = '<div class="panel" style="margin-top:12px"><h3>' + label + '</h3><div class="tablewrap"><table><thead><tr><th>Player</th><th class="num" title="Games left after byes and injury timelines">Games</th><th class="num" title="Projected fantasy points, Weeks ' + CUR + '–' + ROS_END + '">ROS pts</th><th class="num" title="Points over a replacement starter">Over repl.</th><th class="num">Per game</th><th class="num" title="FantasyCalc market value">Market</th><th class="num" title="This tool’s 0–100 value">Value</th><th>Status</th></tr></thead><tbody>';
       S.rows.forEach(function (x) { var inj = INJ[x.p.id], thru = OUT_THRU[x.p.id]; t += '<tr><td><div class="name">' + posBadge(x.p.pos) + '<span class="pn">' + esc(x.p.name) + ' ' + teamBadge(x.p.team) + '</span>' + trendTag(x.p) + '</div></td><td class="num">' + x.r.games + '</td><td class="num"><b>' + f1(x.r.pts) + '</b></td><td class="num">' + f1(x.r.val) + '</td><td class="num">' + f1(x.r.avg) + '</td><td class="num">' + marketChip(x.p) + '</td><td class="num">' + valueChip(x.p) + '</td><td class="small">' + (inj ? injTag(inj) + ' ' + esc(inj.n).slice(0, 90) : thru ? 'Out through Week ' + thru : '<span class="muted">Healthy</span>') + '</td></tr>'; });
       t += '<tr><td><b>Total</b></td><td class="num">' + S.tot.games + '</td><td class="num"><b>' + f1(S.tot.pts) + '</b></td><td class="num"><b>' + f1(S.tot.vor) + '</b></td><td></td><td class="num"><b>' + S.tot.mkt + '</b></td><td class="num"><b>' + S.tot.val + '</b></td><td></td></tr>';
       return t + '</tbody></table></div></div>';
@@ -3295,7 +3309,7 @@ function renderWaivers(evs) {
   if (!leagueKnown) h += '<div style="margin-top:8px"><label class="switch"><input type="checkbox" id="wvHide"' + (hideStars ? ' checked' : '') + '> Hide players who are rostered in nearly every league (market value 20 or more), since no leaguemate rosters are loaded</label></div>';
   if (!mine.length) h += '<p class="note" style="margin-top:8px">You have no ' + esc(pos) + ' on your roster; the best available are listed below.</p>';
   var cols = SKILL[pos] && pos !== "QB", myAll = state.roster.map(playerById).filter(Boolean);
-  h += '<div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Player</th><th>Opponent</th><th>Matchup</th><th class="num" title="Projected fantasy points this week">This week</th><th class="num" title="Season average fantasy points per game">Avg</th><th class="num" title="Last 3 games average">Last 3</th>' + (cols ? '<th class="num" title="Targets (or touches for backs) per game, last 3">Usage L3</th><th class="num">Snap %</th>' + (pos !== "RB" ? '<th class="num">Tgt share</th><th class="num">Routes/db</th>' : '<th class="num">Backfield</th><th class="num">Inside 5</th>') : '') + '<th class="num" title="Projected fantasy points, Weeks 10–' + ROS_END + '">ROS pts</th><th class="num">Market</th><th>Why</th><th title="The roster spot to open for him: the drop that leaves your projected best lineup strongest, with market value as the tie-breaker">Who to drop</th></tr></thead><tbody>';
+  h += '<div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Player</th><th>Opponent</th><th>Matchup</th><th class="num" title="Projected fantasy points this week">This week</th><th class="num" title="Season average fantasy points per game">Avg</th><th class="num" title="Last 3 games average">Last 3</th>' + (cols ? '<th class="num" title="Targets (or touches for backs) per game, last 3">Usage L3</th><th class="num">Snap %</th>' + (pos !== "RB" ? '<th class="num">Tgt share</th><th class="num">Routes/db</th>' : '<th class="num">Backfield</th><th class="num">Inside 5</th>') : '') + '<th class="num" title="Projected fantasy points, Weeks ' + CUR + '–' + ROS_END + '">ROS pts</th><th class="num">Market</th><th>Why</th><th title="The roster spot to open for him: the drop that leaves your projected best lineup strongest, with market value as the tie-breaker">Who to drop</th></tr></thead><tbody>';
   function row(e, kind, cmp) {
     var p = e.p, rf = recentForm(p), sn = SNAP[p.id], w = wrUsage(p), rb = rbUsage(p), rz = RZR[p.id];
     var beats = kind === "avail" && cmp && (mode === "week" ? (!e.bye && !e.out && e.val > cmp.val + 0.5) : rosTotal(p) > rosTotal(cmp.p) + 3);
@@ -4087,7 +4101,7 @@ function valueMax() {
   return VAL_CACHE.max;
 }
 function valueScore(p) { if (!SKILL[p.pos]) return null; return Math.round(100 * Math.pow(cachedRaw(p) / valueMax(), 0.7)); }
-function valueChip(p) { var v = valueScore(p); if (v == null) return '<span class="na">–</span>'; var hue = ratingHue(v); return '<span class="chip" data-sort="' + v + '" title="Trade value 0–100: rest-of-season points over a replacement starter (Weeks 10–' + ROS_END + ', playoff weeks weighted), tilted by recent form and discounted for injury status">' + v + '</span>'.replace('class="chip"', 'class="chip" style="background:hsl(' + hue + ' 60% var(--chip-l));color:hsl(' + hue + ' 70% var(--chip-ink-l))"'); }
+function valueChip(p) { var v = valueScore(p); if (v == null) return '<span class="na">–</span>'; var hue = ratingHue(v); return '<span class="chip" data-sort="' + v + '" title="Trade value 0–100: rest-of-season points over a replacement starter (Weeks ' + CUR + '–' + ROS_END + ', playoff weeks weighted), tilted by recent form and discounted for injury status">' + v + '</span>'.replace('class="chip"', 'class="chip" style="background:hsl(' + hue + ' 60% var(--chip-l));color:hsl(' + hue + ' 70% var(--chip-ink-l))"'); }
 function valueLine(p) {
   var v = valueScore(p); if (v == null) return "";
   var r = playerRos(p), rf = recentForm(p), sa = scoredPpg(p), bits = ["<b>Trade value:</b> " + v + " out of 100 (top player = 100). Built from " + f1(r.pts) + " projected fantasy points over " + r.games + " remaining games, which is " + f1(r.val) + " points over a replacement " + p.pos];
@@ -4309,10 +4323,10 @@ function renderLeague() {
     }
     function oppSel(l, eb) { var used = {}; B.lineup.forEach(function (x) { if (x.ev) used[x.ev.p.id] = 1; }); var opts = theirEvs.filter(function (x) { return eligible(l.slot, x.p.pos) && (!used[x.p.id] || (l.ev && x.p.id === l.ev.p.id)); }).sort(function (a, b) { return b.val - a.val; });
       return '<select data-oslot="' + l.key + '" style="max-width:240px"><option value="">— empty —</option>' + opts.map(function (x) { return '<option value="' + esc(x.p.id) + '"' + (l.ev && x.p.id === l.ev.p.id ? ' selected' : '') + '>' + esc(x.p.name) + ' (' + x.p.team + ' ' + x.p.pos + ') ' + (x.bye ? 'BYE' : x.out ? 'OUT' : f1(x.val)) + '</option>'; }).join("") + '</select>' + (eb ? '<div class="why" style="margin-top:4px">' + esc(why(eb)) + '</div>' + details(eb) : ''); }
-    h += matchupDetail("me", opp.id, 10, A, B, oppManual ? oppSel : null);
+    h += matchupDetail("me", opp.id, CUR, A, B, oppManual ? oppSel : null);
     var wins = 0, rowsA = [], rowsB = [];
     for (var w = CUR; w <= ROS_END; w++) { var va2 = lineupWeek(mine, w), vb2 = lineupWeek(theirs, w); rowsA.push(va2); rowsB.push(vb2); if (va2 > vb2) wins++; }
-    h += '<h3 style="margin-top:16px">Rest of season</h3><p class="note">Projected best-lineup points each week. You project higher in ' + wins + ' of ' + rowsA.length + ' weeks.</p><div class="tablewrap"><table><thead><tr><th></th>' + rowsA.map(function (_, i) { return '<th class="num">Wk ' + (10 + i) + '</th>'; }).join("") + '<th class="num">Total</th></tr></thead><tbody>';
+    h += '<h3 style="margin-top:16px">Rest of season</h3><p class="note">Projected best-lineup points each week. You project higher in ' + wins + ' of ' + rowsA.length + ' weeks.</p><div class="tablewrap"><table><thead><tr><th></th>' + rowsA.map(function (_, i) { return '<th class="num">Wk ' + (CUR + i) + '</th>'; }).join("") + '<th class="num">Total</th></tr></thead><tbody>';
     h += '<tr><td>' + esc(state.myName) + '</td>' + rowsA.map(function (v) { return '<td class="num">' + f1(v) + '</td>'; }).join("") + '<td class="num"><b>' + f1(rowsA.reduce(function (a, b) { return a + b; }, 0)) + '</b></td></tr>';
     h += '<tr><td>' + esc(opp.name) + '</td>' + rowsB.map(function (v) { return '<td class="num">' + f1(v) + '</td>'; }).join("") + '<td class="num"><b>' + f1(rowsB.reduce(function (a, b) { return a + b; }, 0)) + '</b></td></tr></tbody></table></div></div>';
 
@@ -4393,12 +4407,18 @@ function renderLeague() {
 /* ---------- TABS + THEME ---------- */
 function freezeNameColumns() {
   Array.prototype.forEach.call(document.querySelectorAll(".tablewrap table"), function (t) {
-    var ths = Array.prototype.slice.call(t.querySelectorAll("thead th")); if (!ths.length) return;
-    var idx = -1; ths.some(function (th, i) { if (/^(Player|Running back|Team|Slot|Name)$/.test(th.textContent.trim())) { idx = i; return true; } return false; });
-    if (idx < 0 || idx > 2) return;
+    var ths = Array.prototype.slice.call(t.querySelectorAll("thead th, thead td")); if (!ths.length) return;
+    var idx = -1;
+    // 1) the first column whose cells hold a player name; 2) otherwise a header that names the thing in the row
+    var firstRow = t.querySelector("tbody tr");
+    if (firstRow) { Array.prototype.some.call(firstRow.children, function (td, i) { if (i <= 3 && td.querySelector(".name, .pn, .rchip")) { idx = i; return true; } return false; }); }
+    if (idx < 0) ths.some(function (th, i) { if (i <= 3 && /^(Player|Players?|Running back|Team|Slot|Name|Target|Starters?|You started|Lineup|Week|Game|Defense|Trade)$/i.test(th.textContent.replace(/[⇅▲▼↕]/g, "").trim())) { idx = i; return true; } return false; });
+    if (idx < 0 && ths.length >= 4) idx = 0;   // wide tables: pin the first column
+    if (idx < 0) return;
     var lefts = [], acc = 0; for (var i = 0; i <= idx; i++) { lefts.push(acc); acc += ths[i].getBoundingClientRect().width; }
     Array.prototype.forEach.call(t.querySelectorAll("tr"), function (tr) {
       var cells = tr.children; for (var c = 0; c <= idx && c < cells.length; c++) { var cell = cells[c]; if (cell.getAttribute("colspan") && parseInt(cell.getAttribute("colspan"), 10) > 1) break; cell.classList.add("frz"); cell.style.left = lefts[c] + "px"; if (c === idx) cell.classList.add("frz-last"); }
+      if (!tr.children.length) return;
     });
   });
 }
@@ -4425,6 +4445,20 @@ function renderNav(t) {
 state.lastTab = state.lastTab || {};
 Array.prototype.forEach.call(document.querySelectorAll("#groupNav button"), function (b) { b.onclick = function () { var g = GROUPS.filter(function (x) { return x.id === b.getAttribute("data-group"); })[0]; showTab(state.lastTab[g.id] || g.tabs[0][0]); }; });
 document.addEventListener("click", function (e) { if (e.target && e.target.id === "introHide") { state.introHide = true; save(); renderLineup(); } });
+var SHEET_MAX = 720;
+function openSheet(title, html) {
+  var old = document.getElementById("sheet"); if (old) old.remove();
+  var sh = document.createElement("div"); sh.id = "sheet"; sh.className = "sheet";
+  sh.innerHTML = '<div class="sheet-bar"><b>' + esc(title) + '</b><button type="button" class="btn small" id="sheetClose">Close</button></div><div class="sheet-body">' + html + '</div>';
+  document.body.appendChild(sh); document.body.classList.add("sheet-open");
+  var close = function () { sh.remove(); document.body.classList.remove("sheet-open"); };
+  sh.querySelector("#sheetClose").onclick = close; sh.addEventListener("click", function (e) { if (e.target === sh) close(); });
+}
+document.addEventListener("toggle", function (e) {
+  var d = e.target; if (!d || d.tagName !== "DETAILS" || !d.open || window.innerWidth > SHEET_MAX) return;
+  var body = d.querySelector(".morebody"); if (!body || !d.closest(".tablewrap")) return;
+  d.open = false; openSheet(d.getAttribute("data-player") || "Details", body.innerHTML);
+}, true);
 function showTab(t) {
   state.tab = t; state.lastTab = state.lastTab || {}; state.lastTab[groupOf(t).id] = t; renderNav(t); renderClaim();
   ["lineup","players","usage","pstats","matchups","sos","trade","league","report","custom"].forEach(function (k) { $("#tab-" + k).hidden = k !== t; $("#t-" + k).setAttribute("aria-selected", String(k === t)); });
