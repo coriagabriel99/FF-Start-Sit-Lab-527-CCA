@@ -117,6 +117,7 @@ input[type="text"], input[type="number"], select {
 .tablewrap tbody tr { height: 48px; }
 .tablewrap .frz { position: sticky; background: var(--surface); z-index: 2; }
 .tablewrap thead .frz { z-index: 3; }
+.tablewrap thead th.frz-head { position: sticky; top: 0; left: auto !important; will-change: transform; }
 .tablewrap .frz-last { box-shadow: 4px 0 6px -4px rgba(0,0,0,.35); }
 .tablewrap td .small, .tablewrap td.small { white-space: normal; }
 .tablewrap tbody tr:last-child td { border-bottom: 0; }
@@ -308,7 +309,16 @@ ul.plain li { margin: 4px 0; font-size: 14.5px; }
 
 /* ---------- Mobile layout (phones only; desktop is unchanged) ---------- */
 @media (max-width: 720px) {
+  body { font-size: 14px; }
   .wrap { padding: 8px 8px 48px; }
+  .btn { font-size: 13px; padding: 6px 10px; }
+  .btn.small { font-size: 12px; padding: 4px 8px; }
+  .seg button { font-size: 13px; padding: 5px 9px; }
+  label { font-size: 12px; }
+  .pill, .tag { font-size: 11px; }
+  .chip { font-size: 11.5px; }
+  .cmpcard { padding: 10px; }
+  p { margin: 6px 0; }
   header.top { padding: 14px 14px 12px; border-radius: 12px; margin-bottom: 10px; gap: 6px; }
   header.top h1 { font-size: 26px; }
   header.top .sub { font-size: 12.5px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -331,16 +341,16 @@ ul.plain li { margin: 4px 0; font-size: 14.5px; }
   .seg.league-sub::-webkit-scrollbar, .league-sub::-webkit-scrollbar { display: none; }
   .seg.league-sub button, .league-sub button { font-size: 14px; padding: 6px 10px; flex: 0 0 auto; white-space: nowrap; }
   .panel { padding: 12px; border-radius: 10px; }
-  h2 { font-size: 20px; }
-  h3 { font-size: 16px; }
-  .note, .small { font-size: 12.5px; }
-  .big { font-size: 26px; }
+  h2 { font-size: 18px; }
+  h3 { font-size: 15px; }
+  .note, .small { font-size: 12px; }
+  .big { font-size: 24px; }
   .row { gap: 8px; }
   .filterbar > div { max-width: 100% !important; width: 100% !important; }
   .tablewrap { max-height: 70vh; border-radius: 8px; }
-  .tablewrap td, .tablewrap th { padding: 6px 8px; font-size: 13px; }
-  .tablewrap tbody tr { height: 42px; }
-  .name { font-size: 13.5px; }
+  .tablewrap td, .tablewrap th { padding: 5px 7px; font-size: 12.5px; }
+  .tablewrap tbody tr { height: 40px; }
+  .name { font-size: 13px; }
   .name .pn { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
   .tag, .tagimg { transform: scale(.92); transform-origin: left center; }
   .fixtures { grid-template-columns: 1fr; }
@@ -386,7 +396,7 @@ body.sheet-open { overflow: hidden; }
       <p class="sub" tabindex="0" onclick="this.classList.toggle('open')">Lineups, matchup grades, usage, trades and your whole league in one place. Week 11 (Nov. 19–23). Data as of Tuesday, Nov. 17: season averages, usage, recent form, garbage-time splits, kicker and defense scores and defense-vs-position grades run through Week 10 (nflverse); Week 10 lineups and results are in League → History and Week recap, and its projection accuracy is under Player ranks → Accuracy. Week 11 opening spreads and totals are in; the first practice reports land Wednesday and weather forecasts firm up Thursday–Friday, both of which will update the injury list and the projections. Byes: ATL, CLE, GB, LAR, NE, SEA.</p>
     </div>
   </header>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 17, 16:34</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 17, 17:27</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -4417,9 +4427,15 @@ function freezeNameColumns() {
     if (idx < 0) return;
     var lefts = [], acc = 0; for (var i = 0; i <= idx; i++) { lefts.push(acc); acc += ths[i].getBoundingClientRect().width; }
     Array.prototype.forEach.call(t.querySelectorAll("tr"), function (tr) {
-      var cells = tr.children; for (var c = 0; c <= idx && c < cells.length; c++) { var cell = cells[c]; if (cell.getAttribute("colspan") && parseInt(cell.getAttribute("colspan"), 10) > 1) break; cell.classList.add("frz"); cell.style.left = lefts[c] + "px"; if (c === idx) cell.classList.add("frz-last"); }
-      if (!tr.children.length) return;
+      var inHead = !!tr.closest("thead"), cells = tr.children;
+      for (var c = 0; c <= idx && c < cells.length; c++) { var cell = cells[c]; if (cell.getAttribute("colspan") && parseInt(cell.getAttribute("colspan"), 10) > 1) break; cell.classList.add("frz"); if (inHead) { cell.classList.add("frz-head"); cell.style.left = "auto"; cell.setAttribute("data-frzleft", lefts[c]); } else cell.style.left = lefts[c] + "px"; if (c === idx) cell.classList.add("frz-last"); }
     });
+    var wrap = t.closest(".tablewrap");
+    if (wrap) {
+      var pin = function () { var x = wrap.scrollLeft; Array.prototype.forEach.call(t.querySelectorAll("thead .frz-head"), function (th) { th.style.transform = x ? "translateX(" + x + "px)" : ""; }); };
+      if (!wrap.getAttribute("data-frzbound")) { wrap.setAttribute("data-frzbound", "1"); wrap.addEventListener("scroll", pin, { passive: true }); }
+      pin();
+    }
   });
 }
 var _frzTimer = null;
