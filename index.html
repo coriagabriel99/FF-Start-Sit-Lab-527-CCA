@@ -406,7 +406,7 @@ body.sheet-open { overflow: hidden; }
       <p class="sub" tabindex="0" onclick="this.classList.toggle('open')">Lineups, matchup grades, usage, trades and your whole league in one place. Week 11 (Nov. 19–23). Data as of Tuesday, Nov. 17: season averages, usage, recent form, garbage-time splits, kicker and defense scores and defense-vs-position grades run through Week 10 (nflverse); Week 10 lineups and results are in League → History and Week recap, and its projection accuracy is under Player ranks → Accuracy. Week 11 opening spreads and totals are in; the first practice reports land Wednesday and weather forecasts firm up Thursday–Friday, both of which will update the injury list and the projections. Byes: ATL, CLE, GB, LAR, NE, SEA.</p>
     </div>
   </header>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 18, 00:29</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 18, 01:04</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -4937,20 +4937,22 @@ var PALETTES = [
 ];
 var CUSTOM_KEYS = [["--bg", "Page background"], ["--surface", "Panels and tables"], ["--surface-2", "Inputs and second surface"], ["--accent", "Accent (buttons, selected tabs)"], ["--ink", "Text"], ["--muted", "Secondary text"], ["--line", "Borders"]];
 function mixRgb(hex, toHex, t) { var a = hexToRgb(hex), b = hexToRgb(toHex); return "#" + a.map(function (v, i) { return ("0" + Math.round(v + (b[i] - v) * t).toString(16)).slice(-2); }).join(""); }
-function teamThemeVars(team, dark) {
-  var c = TEAM_COLORS[team] || ["#334155", "#94a3b8"], prim = c[0], sec = c[1];
+function themeVarsFrom(prim, sec, dark) {
   var accent = dark ? (lumOf(prim) < 0.12 ? (lumOf(sec) > 0.12 && lumOf(sec) < 0.75 ? sec : mixRgb(prim, "#ffffff", 0.45)) : (lumOf(prim) > 0.6 ? mixRgb(prim, "#000000", 0.35) : prim)) : (lumOf(prim) > 0.62 ? (lumOf(sec) <= 0.62 ? sec : mixRgb(prim, "#000000", 0.45)) : prim);
   if (dark) return { "--bg": mixRgb(prim, "#0b0f1a", 0.82), "--surface": mixRgb(prim, "#121826", 0.78), "--surface-2": mixRgb(prim, "#1a2234", 0.72), "--ink": "#eef2ff", "--muted": "#aab5cc", "--line": mixRgb(prim, "#334155", 0.6), "--accent": accent, "--accent-ink": lumOf(accent) > 0.5 ? "#111111" : "#ffffff", "--ring-line": "#fff", "--chip-l": "24%", "--chip-ink-l": "86%", "color-scheme": "dark" };
   return { "--bg": mixRgb(prim, "#ffffff", 0.9), "--surface": "#ffffff", "--surface-2": mixRgb(prim, "#ffffff", 0.94), "--ink": mixRgb(prim, "#111827", 0.8), "--muted": mixRgb(prim, "#475569", 0.7), "--line": mixRgb(prim, "#ffffff", 0.78), "--accent": accent, "--accent-ink": lumOf(accent) > 0.5 ? "#111111" : "#ffffff", "--ring-line": "#111", "--chip-l": "88%", "--chip-ink-l": "20%", "color-scheme": "light" };
 }
+function teamThemeVars(team, dark) { var c = TEAM_COLORS[team] || ["#334155", "#94a3b8"]; return themeVarsFrom(c[0], c[1], dark); }
 function applyPalette() {
   var root = document.documentElement, pal = state.palette || {}, preset = PALETTES.filter(function (x) { return x.id === pal.preset; })[0];
   CUSTOM_KEYS.concat([["--accent-ink"], ["--ring-line"], ["--chip-l"], ["--chip-ink-l"]]).forEach(function (k) { root.style.removeProperty(k[0]); }); root.style.removeProperty("color-scheme");
-  var vars = preset && preset.id !== "default" ? preset.vars : (pal.preset === "team" && pal.team ? teamThemeVars(pal.team, !!pal.dark) : null);
+  var vars = null;
+  if (preset && preset.id !== "default") { var presetDark = preset.vars["color-scheme"] === "dark"; vars = (pal.dark == null || !!pal.dark === presetDark) ? preset.vars : themeVarsFrom(preset.vars["--accent"], preset.vars["--accent"], !!pal.dark); }
+  else if (pal.preset === "team" && pal.team) vars = teamThemeVars(pal.team, !!pal.dark);
   if (vars) { Object.keys(vars).forEach(function (k) { if (k === "color-scheme") root.style.colorScheme = vars[k]; else root.style.setProperty(k, vars[k]); }); }
   Object.keys(pal.custom || {}).forEach(function (k) { if (pal.custom[k]) root.style.setProperty(k, pal.custom[k]); });
   if (pal.custom && pal.custom["--accent"]) root.style.setProperty("--accent-ink", lumOf(pal.custom["--accent"]) > 0.5 ? "#111111" : "#ffffff");
-  if (pal.custom && pal.custom["--bg"]) { var dark = lumOf(pal.custom["--bg"]) < 0.3; root.style.setProperty("--ring-line", dark ? "#fff" : "#111"); root.style.colorScheme = dark ? "dark" : "light"; }
+  if (pal.custom && pal.custom["--bg"]) { var dark = lumOf(pal.custom["--bg"]) < 0.3; root.style.setProperty("--ring-line", dark ? "#fff" : "#111"); root.style.colorScheme = dark ? "dark" : "light"; root.style.setProperty("--chip-l", dark ? "24%" : "88%"); root.style.setProperty("--chip-ink-l", dark ? "86%" : "20%"); }
   // header banner follows the accent; text flips to black or white for contrast
   ["--hero-a", "--hero-b", "--hero-c", "--hero-ink", "--hero-pill", "--hero-pill-line"].forEach(function (k) { root.style.removeProperty(k); });
   var acc = root.style.getPropertyValue("--accent").trim();
@@ -4961,31 +4963,50 @@ function applyPalette() {
     root.style.setProperty("--hero-pill", ink === "#ffffff" ? "rgba(255,255,255,.16)" : "rgba(0,0,0,.10)"); root.style.setProperty("--hero-pill-line", ink === "#ffffff" ? "rgba(255,255,255,.28)" : "rgba(0,0,0,.25)");
   }
 }
+function hslHex(h, s, l) { h = ((h % 360) + 360) % 360; s /= 100; l /= 100; var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, r = 0, g = 0, b = 0; if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; } else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; } else if (h < 300) { r = x; b = c; } else { r = c; b = x; } return "#" + [r, g, b].map(function (v) { return ("0" + Math.round((v + m) * 255).toString(16)).slice(-2); }).join(""); }
+function randomPalette(fixedHue, fixedAcc, fixedDark) {
+  var hue = fixedHue != null ? fixedHue : Math.floor(Math.random() * 360), dark = fixedDark != null ? fixedDark : Math.random() < 0.45, accHue = fixedAcc != null ? fixedAcc : (hue + (Math.random() < 0.5 ? 0 : 150 + Math.floor(Math.random() * 60))) % 360;
+  var accent = hslHex(accHue, 60 + Math.random() * 30, dark ? 55 + Math.random() * 10 : 38 + Math.random() * 12);
+  var custom = dark ? { "--bg": hslHex(hue, 25 + Math.random() * 20, 8 + Math.random() * 6), "--surface": hslHex(hue, 20 + Math.random() * 15, 14 + Math.random() * 5), "--surface-2": hslHex(hue, 18 + Math.random() * 12, 20 + Math.random() * 5), "--ink": hslHex(hue, 20, 93), "--muted": hslHex(hue, 15, 70), "--line": hslHex(hue, 15, 28), "--accent": accent }
+                    : { "--bg": hslHex(hue, 30 + Math.random() * 30, 93 + Math.random() * 4), "--surface": "#ffffff", "--surface-2": hslHex(hue, 30 + Math.random() * 20, 96), "--ink": hslHex(hue, 35, 14), "--muted": hslHex(hue, 20, 42), "--line": hslHex(hue, 25, 86), "--accent": accent };
+  return { preset: "default", custom: custom, dark: dark, random: true, hue: hue, accHue: accHue };
+}
 function renderPalette() {
   var el = $("#palettePanel"); if (!el) return; var pal = state.palette || { preset: "default", custom: {} };
   var cur = function (k) { return (pal.custom && pal.custom[k]) || getComputedStyle(document.documentElement).getPropertyValue(k).trim() || "#ffffff"; };
-  var h = '<div class="row" style="justify-content:space-between"><div><h3 style="margin:0">Colors</h3><p class="note">Pick a preset or set each color yourself. Your choice is saved on this device' + (state.myName ? ' for ' + esc(state.myName) : '') + ' and does not change anyone else’s view.</p></div><button class="btn ghost small" type="button" id="paletteReset">Back to default</button></div>';
+  var h = '<div class="row" style="justify-content:space-between"><div><h3 style="margin:0">Colors</h3><p class="note">Pick a preset or set each color yourself. Your choice is saved on this device' + (state.myName ? ' for ' + esc(state.myName) : '') + ' and does not change anyone else’s view.</p></div><div class="row" style="gap:6px"><button class="btn small" type="button" id="paletteRandom" title="Pick a random readable colour scheme">🎲 Randomize</button><button class="btn ghost small" type="button" id="paletteReset">Back to default</button></div></div>';
   h += '<div class="row" style="margin-top:8px;flex-wrap:wrap;gap:6px">' + PALETTES.map(function (x) { var v = x.vars; return '<button type="button" class="btn small' + (pal.preset === x.id ? '' : ' ghost') + '" data-pal="' + x.id + '" style="' + (v["--bg"] ? 'background:' + v["--bg"] + ';color:' + v["--ink"] + ';border-color:' + v["--line"] : '') + '"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + (v["--accent"] || 'var(--accent)') + ';margin-right:6px;vertical-align:-1px"></span>' + x.name + '</button>'; }).join("") + '</div>';
   var teamsAll = Object.keys(TEAM_NAMES).sort();
-  h += '<div class="row" style="margin-top:10px;align-items:flex-end;gap:12px"><div style="width:260px"><label for="palTeam">Or use an NFL team’s colors</label><select id="palTeam"><option value="">— pick a team —</option>' + teamsAll.map(function (t) { return '<option value="' + t + '"' + (pal.preset === "team" && pal.team === t ? ' selected' : '') + '>' + t + ' · ' + esc(TEAM_NAMES[t]) + '</option>'; }).join("") + '</select></div><label class="row" style="gap:6px;align-items:center;margin-bottom:8px"><input type="checkbox" id="palDark"' + (pal.dark ? ' checked' : '') + '> <span class="small">Dark version</span></label></div>';
+  h += '<div class="row" style="margin-top:10px;align-items:flex-end;gap:12px"><div style="width:260px"><label for="palTeam">Or use an NFL team’s colors</label><select id="palTeam"><option value="">— pick a team —</option>' + teamsAll.map(function (t) { return '<option value="' + t + '"' + (pal.preset === "team" && pal.team === t ? ' selected' : '') + '>' + t + ' · ' + esc(TEAM_NAMES[t]) + '</option>'; }).join("") + '</select></div></div>';
   h += '<div class="row" style="margin-top:10px;flex-wrap:wrap;gap:14px">' + CUSTOM_KEYS.map(function (k) { var val = cur(k[0]); if (!/^#[0-9a-fA-F]{6}$/.test(val)) val = "#ffffff"; return '<label class="small" style="display:flex;align-items:center;gap:6px"><input type="color" data-palkey="' + k[0] + '" value="' + val + '" style="width:34px;height:26px;padding:0;border:1px solid var(--line);border-radius:6px;background:none"> ' + k[1] + '</label>'; }).join("") + '</div>';
   el.innerHTML = h;
-  Array.prototype.forEach.call(el.querySelectorAll("[data-pal]"), function (b) { b.onclick = function () { state.palette = { preset: b.getAttribute("data-pal"), custom: {} }; save(); applyPalette(); renderPalette(); }; });
+  Array.prototype.forEach.call(el.querySelectorAll("[data-pal]"), function (b) { b.onclick = function () { var id = b.getAttribute("data-pal"); state.palette = { preset: id, custom: {} }; if (id === "default") document.documentElement.removeAttribute("data-theme"); save(); applyPalette(); renderCustomize(); }; });
   Array.prototype.forEach.call(el.querySelectorAll("[data-palkey]"), function (i) { i.oninput = function () { state.palette = state.palette || { preset: "default", custom: {} }; state.palette.custom = state.palette.custom || {}; state.palette.custom[i.getAttribute("data-palkey")] = i.value; save(); applyPalette(); }; });
-  var pr = $("#paletteReset"); if (pr) pr.onclick = function () { state.palette = { preset: "default", custom: {} }; save(); applyPalette(); renderPalette(); };
-  var pt = $("#palTeam"); if (pt) pt.onchange = function () { if (!this.value) { state.palette = { preset: "default", custom: {} }; } else { state.palette = { preset: "team", team: this.value, dark: !!(state.palette && state.palette.dark), custom: {} }; } save(); applyPalette(); renderPalette(); };
-  var pd = $("#palDark"); if (pd) pd.onchange = function () { state.palette = state.palette || { preset: "default", custom: {} }; state.palette.dark = this.checked; if (state.palette.preset !== "team" && this.checked) { /* dark toggle applies to team palettes only */ } save(); applyPalette(); renderPalette(); };
+  var pr = $("#paletteReset"); if (pr) pr.onclick = function () { state.palette = { preset: "default", custom: {} }; document.documentElement.removeAttribute("data-theme"); save(); applyPalette(); renderCustomize(); };
+  var prand = $("#paletteRandom"); if (prand) prand.onclick = function () { state.palette = randomPalette(); save(); applyPalette(); renderCustomize(); };
+  var pt = $("#palTeam"); if (pt) pt.onchange = function () { if (!this.value) { state.palette = { preset: "default", custom: {} }; } else { state.palette = { preset: "team", team: this.value, dark: effectiveDark(), custom: {} }; } save(); applyPalette(); renderCustomize(); };
+}
+function effectiveDark() {
+  var root = document.documentElement, bg = root.style.getPropertyValue("--bg").trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(bg)) return lumOf(bg) < 0.3;
+  var cur = root.getAttribute("data-theme"); if (cur) return cur === "dark";
+  return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
 }
 function toggleTheme() {
-  var root = document.documentElement, cur = root.getAttribute("data-theme");
-  var sysDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  var isDark = cur ? cur === "dark" : sysDark;
-  root.setAttribute("data-theme", isDark ? "light" : "dark");
+  var root = document.documentElement, pal = state.palette || { preset: "default", custom: {} }, toDark = !effectiveDark();
+  var hasCustom = pal.custom && Object.keys(pal.custom).some(function (k) { return pal.custom[k]; });
+  if (pal.random && pal.hue != null) { state.palette = randomPalette(pal.hue, pal.accHue, toDark); }           // same colours, other brightness
+  else if (pal.preset === "team" || (pal.preset && pal.preset !== "default")) { pal.dark = toDark; state.palette = pal; }   // team or preset: generated light/dark variant
+  else if (hasCustom) { pal.dark = toDark; var acc = pal.custom["--accent"] || getComputedStyle(root).getPropertyValue("--accent").trim(); var v = themeVarsFrom(acc, acc, toDark); Object.keys(v).forEach(function (k) { if (k !== "color-scheme" && (!pal.custom[k] || k !== "--accent")) pal.custom[k] = v[k]; }); state.palette = pal; }   // custom picks: rebuild around the chosen accent
+  else root.setAttribute("data-theme", toDark ? "dark" : "light");   // plain default theme
+  save(); applyPalette();
 }
 function renderCustomize() {
   var el = $("#tab-custom"), root = document.documentElement, cur = root.getAttribute("data-theme"), sysDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches, isDark = cur ? cur === "dark" : sysDark;
-  el.innerHTML = '<div class="panel" style="margin-bottom:12px"><div class="row" style="justify-content:space-between"><div><h2>Light or dark</h2><p class="note">Currently ' + (isDark ? 'dark' : 'light') + (cur ? '' : ' (following your device setting)') + '. Presets and team colors below override this.</p></div><button class="btn" type="button" id="themeBtn">Switch to ' + (isDark ? 'light' : 'dark') + '</button></div></div><div id="palettePanel" class="panel"></div>';
+  isDark = effectiveDark();
+  el.innerHTML = '<div class="panel" style="margin-bottom:12px"><div class="row" style="justify-content:space-between"><div><h2>Light or dark</h2><p class="note">Currently ' + (isDark ? 'dark' : 'light') + '. The switch works with whatever is picked below: a preset, a team’s colors, a random scheme or your own picks are rebuilt in the other brightness.</p></div><button class="btn" type="button" id="themeBtn">Switch to ' + (isDark ? 'light' : 'dark') + '</button></div></div><div id="palettePanel" class="panel"></div>';
   $("#themeBtn").onclick = function () { toggleTheme(); renderCustomize(); };
+  if (typeof renderPalette.pending === "undefined") renderPalette.pending = false;
   renderPalette();
 }
 load();
