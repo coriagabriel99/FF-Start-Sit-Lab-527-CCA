@@ -191,7 +191,7 @@ nav.tabs button[aria-selected="true"] { background: var(--accent); color: var(--
 .weekbar .wb-sub { font-size: 13px; color: var(--muted); }
 .weekbar .wb-build { margin-left: auto; font-size: 11.5px; color: var(--muted); }
 .tabs.subnav { top: calc(env(safe-area-inset-top, 0px) + 46px); }
-.tabs.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px; padding: 6px; margin-bottom: 8px; position: static; box-shadow: none; }
+.tabs.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; padding: 6px; margin-bottom: 8px; position: static; box-shadow: none; }
 .tabs.groups button { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; border-radius: 10px; font-family: inherit; white-space: normal; }
 .tabs.groups button .ico { font-size: 22px; line-height: 1; flex: 0 0 auto; }
 .tabs.groups button b { display: block; font-family: "Barlow Condensed", sans-serif; font-size: 19px; font-weight: 700; line-height: 1.1; }
@@ -338,7 +338,7 @@ ul.plain li { margin: 4px 0; font-size: 14.5px; }
   .weekbar .wb-week { font-size: 17px; padding: 1px 8px; }
   .weekbar .wb-sub { font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
   .weekbar .wb-build { display: none; }
-  .tabs.groups { grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; }
+  .tabs.groups { grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px; }
   .tabs.groups button small { display: none; }
   .tabs.groups button { flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 8px 4px; }
   .tabs.groups button .ico { font-size: 18px; }
@@ -406,7 +406,7 @@ body.sheet-open { overflow: hidden; }
       <p class="sub" tabindex="0" onclick="this.classList.toggle('open')">Lineups, matchup grades, usage, trades and your whole league in one place. Week 11 (Nov. 19–23). Data as of Tuesday, Nov. 17: season averages, usage, recent form, garbage-time splits, kicker and defense scores and defense-vs-position grades run through Week 10 (nflverse); Week 10 lineups and results are in League → History and Week recap, and its projection accuracy is under Player ranks → Accuracy. Week 11 opening spreads and totals are in; the first practice reports land Wednesday and weather forecasts firm up Thursday–Friday, both of which will update the injury list and the projections. Byes: ATL, CLE, GB, LAR, NE, SEA.</p>
     </div>
   </header>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 18, 01:04</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 18, 01:12</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -415,13 +415,14 @@ body.sheet-open { overflow: hidden; }
     <button type="button" data-group="nfl"><span class="ico">🏟️</span><span><b>NFL teams</b><small>Offense tendencies, pass vs run</small></span></button>
     <button type="button" data-group="week"><span class="ico">🏈</span><span><b>This week’s games</b><small>Matchups, injuries, weather, schedules</small></span></button>
     <button type="button" data-group="league"><span class="ico">🏆</span><span><b>League</b><small>Rosters, standings, history, awards</small></span></button>
+    <button type="button" data-group="ask"><span class="ico">💬</span><span><b>Ask</b><small>Questions answered from your data</small></span></button>
     <button type="button" data-group="custom"><span class="ico">🎨</span><span><b>Customize</b><small>Theme and colors</small></span></button>
   </nav>
   <nav class="tabs subnav" id="subNav" role="tablist" aria-label="Pages in this section"></nav>
   <nav class="tabs legacy" role="tablist" aria-label="Sections" hidden>
     <button role="tab" id="t-lineup" aria-selected="true" data-tab="lineup">My lineup</button>
     <button role="tab" id="t-players" aria-selected="false" data-tab="players">Player ranks</button>
-    <button role="tab" id="t-usage" aria-selected="false" data-tab="usage">Usage</button><button type="button" role="tab" id="t-pstats" data-tab="pstats" aria-selected="false">Player stats</button><button type="button" role="tab" id="t-custom" data-tab="custom" aria-selected="false">Customize</button><button type="button" role="tab" id="t-histopp" data-tab="histopp" aria-selected="false">History vs opponents</button><button type="button" role="tab" id="t-nfl" data-tab="nfl" aria-selected="false">NFL teams</button><button type="button" role="tab" id="t-vsdef" data-tab="vsdef" aria-selected="false">Stats vs defenses</button>
+    <button role="tab" id="t-usage" aria-selected="false" data-tab="usage">Usage</button><button type="button" role="tab" id="t-pstats" data-tab="pstats" aria-selected="false">Player stats</button><button type="button" role="tab" id="t-custom" data-tab="custom" aria-selected="false">Customize</button><button type="button" role="tab" id="t-histopp" data-tab="histopp" aria-selected="false">History vs opponents</button><button type="button" role="tab" id="t-nfl" data-tab="nfl" aria-selected="false">NFL teams</button><button type="button" role="tab" id="t-vsdef" data-tab="vsdef" aria-selected="false">Stats vs defenses</button><button type="button" role="tab" id="t-ask" data-tab="ask" aria-selected="false">Ask</button>
     <button role="tab" id="t-matchups" aria-selected="false" data-tab="matchups">Matchups</button>
     <button role="tab" id="t-sos" aria-selected="false" data-tab="sos">Strength of schedule per position</button>
     <button role="tab" id="t-trade" aria-selected="false" data-tab="trade">Trades</button>
@@ -442,6 +443,7 @@ body.sheet-open { overflow: hidden; }
   <section id="tab-histopp" hidden></section>
   <section id="tab-nfl" hidden></section>
   <section id="tab-vsdef" hidden></section>
+  <section id="tab-ask" hidden></section>
 
   <footer class="sources panel">
     <div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">How the numbers work</h3><button class="btn ghost small" type="button" id="methodToggle" aria-expanded="false" aria-controls="methodBody">Show</button></div>
@@ -461,6 +463,7 @@ body.sheet-open { overflow: hidden; }
       <li><b>Accuracy.</b> Rebuilds each player’s pre-game projection from the data as of Week 9 (season average, last-3 form, matchup, line, weather) and compares it with his actual Week 10 score; shows mean error, bias and the share within 5 points by position, plus the biggest misses.</li>
       <li><b>Trends.</b> Usage → Trends &amp; compare lists every player’s last six games of snaps, touches or targets and points as small lines, with the change in each between his last three games and the games before, and a Compare panel that overlays any number of players on one chart (points, usage or snaps) with their floor, ceiling, boom and bust rates side by side. Each player’s details list the same six-game numbers.</li>
       <li><b>History and awards.</b> Every week moves into history automatically once all of its games are final, using the lineups set in the tool (best-projected for teams without one), and can be edited afterwards. Under League → History &amp; awards you type each week’s starters (and bench) for every team, the same way rosters are entered, and set that week’s matchups; a paste option is there too. Player ranks → By week shows every player’s actual points and usage line for any week. Points come from the real box scores in your scoring (kickers and defenses included). The awards use every week entered: best and worst manager by lineup efficiency (points started as a share of the best lineup available from starters plus bench), luckiest and unluckiest by real wins minus expected wins (each week’s share of the league a team outscored), and most points left on the bench. The records table adds median scoring: a second game each week against the league median, shown on its own and combined with head-to-head as a double-header record.</li>
+      <li><b>Ask.</b> The Ask section sends your question to Claude together with the page’s own data (your roster lines, best and set lineups, this week’s opponent, standings, top free agents, the slate and lines) and lets Claude look up any player, position ranking, NFL offense, defense or league team through the page’s functions, so answers cite the same numbers shown in the tabs. In claude.ai it runs on your account; a hosted copy needs an API key you provide.</li>
       <li><b>Past lineups.</b> My team → My lineup has a week bar; pick an earlier week to see the lineup you actually started that week as recorded in History (slot by slot, each player’s NFL opponent and points, your bench and anyone who should have started), your score against that week’s opponent and the best lineup your roster could have produced.</li>
       <li><b>Stats vs defenses.</b> Players → Stats vs defenses is 2026-only. “Man vs zone defenses” groups a player’s plays by the opponent’s coverage identity (man-heavy 22%+ man, zone-heavy under 16.5%, balanced between; Sharp Football Analysis team rates). “Blitz vs no blitz” and “defenders in the box” come from play-by-play charting (FTN via nflverse). Per-play man/zone tags for 2026 are not public yet and will replace the defense-level grouping when released.</li>
       <li><b>NFL teams.</b> Offensive tendencies from play-by-play through the last completed week: pass rate overall and in neutral script (score within 7, quarters 1–3), pass rate when up or down 14+ and in the fourth quarter with a lead, plays, yards and points per game, each against the league average, with a note tying it to this week’s Vegas line so you can judge whether a team will keep throwing or sit on a lead.</li>
@@ -1371,7 +1374,7 @@ var AVG = {}, RANK = {}, SCHED = {}, AVG_IMPL = 0, PROFILE = {};
 /* ---------- STATE ---------- */
 var state = { roster: EXAMPLE_ROSTER.slice(), custom: [], slots: { QB:1, RB:2, WR:2, TE:1, FLEX:1, SF:0, K:1, DST:1 }, example: true, risk: true,
               tab: "lineup", posFilter: "ALL", mPos: "WR", uPos: "WR", sPos: "RB", cmpA: "", cmpB: "", tGive: [], tGet: [], playoffW: true, teams: [], myName: "My team", tPartner: "", mOpp: "", scoring: { rec: 1, tep: 0, ptd: 4 }, sugTeam: "", sugMode: "fair", sugOpen: true, sugKind: "browse", sugBuy: "", sugSell: "", buyShape: "all", fq: "", fTeam: "", rStat: "proj", basis: "season", appProj: {}, lineupMode: "auto", manual: {}, combos: [], h2hMine: "best", schedule: {}, manualW: {}, schWeek: 10, edTeam: "", schView: -1, leagueSub: "rosters", schOpen: {}, schSel: {}, standings: {}, playoffSpots: 6, regEnd: 14, upPos: "RB", upHorizon: "ros", excludeLocked: true, qa: [], qb: [], lineupSub: "lineup", wvPos: "TE", wvMode: "week", chooseTeam: false, histText: {}, histWeek: 1 };
-function save() { cloudSchedule(); try { localStorage.setItem("startsit-w10", JSON.stringify({ roster: state.roster, custom: state.custom, slots: state.slots, example: state.example, risk: state.risk, teams: state.teams, myName: state.myName, tPartner: state.tPartner, mOpp: state.mOpp, scoring: state.scoring, basis: state.basis, appProj: state.appProj, lineupMode: state.lineupMode, manual: state.manual, combos: state.combos, schedule: state.schedule, manualW: state.manualW, leagueSub: state.leagueSub, standings: state.standings, playoffSpots: state.playoffSpots, regEnd: state.regEnd, qa: state.qa, qb: state.qb, lineupSub: state.lineupSub, chooseTeam: state.chooseTeam, trCmp: state.trCmp, histText: state.histText, hist: state.hist, histAuto: state.histAuto, psPlayer: state.psPlayer, psBasis: state.psBasis, histSeeded: state.histSeeded, histSeedVersion: state.histSeedVersion, introHide: state.introHide, ctCurrentOnly: state.ctCurrentOnly, palette: state.palette, hoScope: state.hoScope, showInactive: state.showInactive, vdPos: state.vdPos, vdScope: state.vdScope, vdView: state.vdView })); } catch (e) {} }
+function save() { cloudSchedule(); try { localStorage.setItem("startsit-w10", JSON.stringify({ roster: state.roster, custom: state.custom, slots: state.slots, example: state.example, risk: state.risk, teams: state.teams, myName: state.myName, tPartner: state.tPartner, mOpp: state.mOpp, scoring: state.scoring, basis: state.basis, appProj: state.appProj, lineupMode: state.lineupMode, manual: state.manual, combos: state.combos, schedule: state.schedule, manualW: state.manualW, leagueSub: state.leagueSub, standings: state.standings, playoffSpots: state.playoffSpots, regEnd: state.regEnd, qa: state.qa, qb: state.qb, lineupSub: state.lineupSub, chooseTeam: state.chooseTeam, trCmp: state.trCmp, histText: state.histText, hist: state.hist, histAuto: state.histAuto, psPlayer: state.psPlayer, psBasis: state.psBasis, histSeeded: state.histSeeded, histSeedVersion: state.histSeedVersion, introHide: state.introHide, ctCurrentOnly: state.ctCurrentOnly, palette: state.palette, hoScope: state.hoScope, showInactive: state.showInactive, vdPos: state.vdPos, vdScope: state.vdScope, vdView: state.vdView, askLog: state.askLog, askKey: state.askKey })); } catch (e) {} }
 function load() {
   try {
     var raw = localStorage.getItem("startsit-w10");
@@ -1415,7 +1418,7 @@ function load() {
     if (d.palette) state.palette = d.palette;
     if (d.hoScope) state.hoScope = d.hoScope;
     if (d.showInactive) state.showInactive = true;
-    if (d.vdPos) state.vdPos = d.vdPos; if (d.vdScope) state.vdScope = d.vdScope; if (d.vdView) state.vdView = d.vdView;
+    if (d.vdPos) state.vdPos = d.vdPos; if (d.vdScope) state.vdScope = d.vdScope; if (d.vdView) state.vdView = d.vdView; if (d.askLog) state.askLog = d.askLog; if (d.askKey) state.askKey = d.askKey;
   } catch (e) {}
   applyScoring();
 }
@@ -4484,6 +4487,109 @@ function headerTip(text, th) {
 function applyHeaderTips(root) {
   Array.prototype.forEach.call((root || document).querySelectorAll("table th"), function (th) { if (!th.getAttribute("title")) { var tip = headerTip(th.textContent, th); if (tip) th.setAttribute("title", tip); } });
 }
+/* ---------- ASK: questions answered by Claude with the page's own data ---------- */
+function stripTags(h) { var d = document.createElement("div"); d.innerHTML = h || ""; return (d.textContent || "").replace(/\s+/g, " ").trim(); }
+function askPlayerLine(p, full) {
+  var e = evalPlayer(p), rf = recentForm(p), d = distro(p), s = SCHED[p.team], inj = INJ[p.id];
+  var line = p.name + " (" + p.pos + ", " + p.team + (ownerOf(p.id) ? ", owned by " + esc(ownerOf(p.id).name) : state.roster.indexOf(p.id) >= 0 ? ", on my roster" : ", free agent") + "): ";
+  if (e.bye) return line + "BYE this week; season avg " + f1(scoredPpg(p)) + ".";
+  line += (s.home ? "vs " : "at ") + e.opp + " " + (e.kickoff || "") + "; projection " + f1(e.proj) + (e.out ? " (OUT)" : "") + "; season avg " + f1(scoredPpg(p)) + " over " + (p.gp || 0) + " g";
+  if (rf && rf.avg != null) line += "; last-3 avg " + f1(rf.avg);
+  if (e.rating != null) line += "; matchup grade " + Math.round(e.rating) + "/100" + (e.defRank ? " (defense ranks #" + e.defRank + " in points allowed to " + p.pos + "s, 1 = most)" : "");
+  if (d) line += "; boom " + Math.round(d.boom * 100) + "% / bust " + Math.round(d.bust * 100) + "%";
+  if (inj) line += "; injury: " + inj.s + " (" + inj.n + ")";
+  if (isInactive(p)) line += "; inactive (has not played recently or out long-term)";
+  if (full) {
+    var u = usageLevel(p); if (u) line += "; usage tier: " + u.lvl + " (" + u.text + ")";
+    if (p.pos === "RB") { var r = rbUsage(p); if (r.share != null) line += "; backfield share last 3: " + Math.round(r.share * 100) + "% (season " + Math.round((r.seasonShare || 0) * 100) + "%)"; if (r.snap != null) line += ", snaps " + r.snap + "%"; }
+    else if (p.pos === "WR" || p.pos === "TE") { var w2 = wrUsage(p); if (w2.tgt != null) line += "; target share last 3: " + w2.tgt + "% (season " + (w2.tgtSeason != null ? w2.tgtSeason : "?") + "%)"; if (w2.snap != null) line += ", snaps " + w2.snap + "%"; if (w2.tprr != null) line += ", TPRR " + w2.tprr + "%"; }
+    var rows = weekRows(p).slice(-5); if (rows.length) line += "; recent games: " + rows.map(function (r) { return "Wk" + r[0] + " vs " + r[5] + " " + f1(r[1]); }).join(", ");
+    if (s && !e.bye) { var H = histVsOpp(p), o = H.by[e.opp]; if (o && o.games.length) line += "; vs " + e.opp + " since 2024: " + f1(o.sum / o.games.length) + " avg in " + o.games.length + " games"; }
+    if (e.wx) line += "; weather: " + stripTags(e.wx.t);
+    var wy = why(e); if (wy) line += "; note: " + stripTags(wy);
+  }
+  return line;
+}
+function askContext() {
+  var L = [];
+  L.push("You are the assistant inside a fantasy football start/sit tool (league: " + (state.myName ? state.myName + "'s team in " : "") + "ESPN-style PPR, " + Object.keys(state.slots || {}).map(function (k) { return k + " x" + state.slots[k]; }).join(", ") + "). It is NFL Week " + CUR + " of the 2026 season; completed weeks are 1-" + (CUR - 1) + ". Answer the user's question using the data below first; be concrete, cite the numbers you use, keep it short (a few sentences or a short list), and say when something is a judgment call or when data is missing. Do not invent stats that are not below.");
+  L.push("Defense-vs-position grades, usage, recent form and projections come from this season's nflverse data through Week " + (CUR - 1) + "; Vegas lines are opening Week " + CUR + " numbers. Projection = season average or recent form adjusted for matchup, line, weather, injury.");
+  var mine = state.roster.map(playerById).filter(Boolean);
+  if (mine.length) {
+    L.push("\nMY ROSTER (Week " + CUR + "):"); mine.forEach(function (p) { L.push("- " + askPlayerLine(p, true)); });
+    var opts = myLineupOptions(mine), best = opts[0].L; L.push("\nBEST PROJECTED LINEUP (" + f1(best.total) + " pts): " + best.lineup.map(function (l) { return l.slot + ": " + (l.ev ? l.ev.p.name + " " + f1(l.ev.val) : "empty"); }).join("; "));
+    var man = opts.filter(function (o) { return o.key === "manual"; })[0]; if (man) L.push("MY SET LINEUP (" + f1(man.L.total) + " pts): " + man.L.lineup.map(function (l) { return l.slot + ": " + (l.ev ? l.ev.p.name + " " + f1(l.ev.val) : "empty"); }).join("; "));
+    var bench = mine.filter(function (p) { return !best.lineup.some(function (l) { return l.ev && l.ev.p.id === p.id; }); }); if (bench.length) L.push("BENCH (best lineup): " + bench.map(function (p) { return p.name + " " + f1(evalPlayer(p).proj); }).join(", "));
+  }
+  // this week's fantasy opponent
+  var pairs = state.schedule[CUR] || [], oppId = null; pairs.forEach(function (g) { if (g[0] === "me") oppId = g[1]; else if (g[1] === "me") oppId = g[0]; });
+  if (!oppId && state.mOpp && teamById(state.mOpp)) oppId = state.mOpp;
+  if (oppId && teamById(oppId)) { var T = teamById(oppId), ol = oppLineup(T, teamPlayers(T)); L.push("\nMY FANTASY OPPONENT THIS WEEK: " + T.name + ", projected " + f1(ol.total) + ": " + ol.lineup.map(function (l) { return l.slot + ": " + (l.ev ? l.ev.p.name + " " + f1(l.ev.val) : "empty"); }).join("; ")); }
+  // standings
+  if (state.teams.length) { var st = standingsRowsSafe(); if (st) L.push("\nLEAGUE STANDINGS: " + st); }
+  // waivers
+  var fa = allPlayers().filter(function (p) { return !ownerOf(p.id) && state.roster.indexOf(p.id) < 0 && !p.est && !isInactive(p) && SKILL[p.pos]; });
+  if (state.teams.length || state.roster.length) { ["QB", "RB", "WR", "TE"].forEach(function (pos) { var top = fa.filter(function (p) { return p.pos === pos; }).map(function (p) { return { p: p, e: evalPlayer(p) }; }).filter(function (x) { return !x.e.bye && !x.e.out; }).sort(function (a, b) { return b.e.proj - a.e.proj; }).slice(0, 5); if (top.length) L.push("TOP FREE AGENT " + pos + "s this week: " + top.map(function (x) { return x.p.name + " (" + x.p.team + ") " + f1(x.e.proj) + " proj, " + f1(scoredPpg(x.p)) + " avg"; }).join("; ")); }); }
+  L.push("\nBYES this week: " + BYES.join(", ") + ". Games: " + GAMES.map(function (g) { return g[0] + " at " + g[1] + " (" + g[2] + " -" + g[3] + ", total " + g[4] + ", " + g[5] + ")"; }).join("; "));
+  return L.join("\n");
+}
+function standingsRowsSafe() { try { var ids = allTeamIds(); return ids.map(function (id) { var st = state.standings[id] || state.standings[id === "me" ? "me" : id]; return teamNameById(id) + (st ? " " + (st.w || 0) + "-" + (st.l || 0) : ""); }).join(", "); } catch (e) { return null; } }
+function askTools() {
+  return [
+    { name: "player_lookup", description: "Full detail on one player by name: projection, matchup, usage, recent games, history vs this week's opponent, injury. Use when a question names a player not on the user's roster or you need more detail.", inputSchema: { type: "object", properties: { name: { type: "string" } }, required: ["name"] }, execute: function (input) { var p = findByLabel(input.name) || findInLine(input.name, nameIndex()); if (!p) { var q = (input.name || "").toLowerCase(); p = allPlayers().filter(function (x) { return x.name.toLowerCase().indexOf(q) >= 0; })[0]; } if (!p) return "No player found for " + input.name; return askPlayerLine(p, true); } },
+    { name: "position_rankings", description: "This week's top players at a position by projection (or by season average). pos = QB|RB|WR|TE|K|DST; n up to 25; basis = 'week' or 'season'.", inputSchema: { type: "object", properties: { pos: { type: "string" }, n: { type: "number" }, basis: { type: "string" } }, required: ["pos"] }, execute: function (input) { var pos = (input.pos || "RB").toUpperCase(), n = Math.min(25, input.n || 12); var rows = allPlayers().filter(function (p) { return p.pos === pos && !p.est && !isInactive(p); }).map(function (p) { return { p: p, e: evalPlayer(p) }; }); if (input.basis === "season") rows.sort(function (a, b) { return scoredPpg(b.p) - scoredPpg(a.p); }); else rows = rows.filter(function (x) { return !x.e.bye && !x.e.out; }).sort(function (a, b) { return b.e.proj - a.e.proj; }); return rows.slice(0, n).map(function (x, i) { return (i + 1) + ". " + x.p.name + " (" + x.p.team + (ownerOf(x.p.id) ? ", " + ownerOf(x.p.id).name : state.roster.indexOf(x.p.id) >= 0 ? ", mine" : ", FA") + ") proj " + f1(x.e.proj) + ", avg " + f1(scoredPpg(x.p)) + (x.e.opp ? ", " + (x.e.home ? "vs " : "at ") + x.e.opp + ", grade " + Math.round(x.e.rating || 0) : ", bye"); }).join("\n"); } },
+    { name: "team_offense", description: "An NFL team's offensive tendencies this season: pass rate overall/neutral, pass rate when up or down 14+, yards and points per game, plus their Week opponent and the Vegas line.", inputSchema: { type: "object", properties: { team: { type: "string" } }, required: ["team"] }, execute: function (input) { var t = (input.team || "").toUpperCase(), T = TEND[t]; if (!T) return "Unknown team " + input.team; var L = tendLabel(T), opp = SCHEDULE[t] ? SCHEDULE[t][CUR - 1] : null; return TEAM_NAMES[t] + ": " + L.base + ", " + L.lead + ". Pass rate " + T.pass + "% (neutral " + (T.neutral || "?") + "%, league " + TEND_LG.neutral + "%); up 14+ " + (T.up14.pass != null ? T.up14.pass + "%" : "n/a") + " (" + T.up14.n + " plays); down 14+ " + (T.down14.pass != null ? T.down14.pass + "%" : "n/a") + "; Q4 with lead " + (T.q4lead.pass != null ? T.q4lead.pass + "%" : "n/a") + ". " + T.plays + " plays/g, " + f1(T.ypg) + " yds/g (" + f1(T.pypg) + " pass, " + f1(T.rypg) + " rush), " + f1(T.ppg) + " pts/g, " + f1(T.pa) + " allowed. " + (opp ? "Week " + CUR + ": " + (SCHED[t] && SCHED[t].home ? "vs " : "at ") + opp + (SCHED[t] && SCHED[opp] ? ", implied " + f1(SCHED[t].impl) + "-" + f1(SCHED[opp].impl) : "") + "." : "On bye."); } },
+    { name: "defense_vs_position", description: "How a defense fares against each position this season: fantasy points allowed per game to QB/RB/WR/TE with league rank (1 = allows the most), coverage style and blitz rate.", inputSchema: { type: "object", properties: { team: { type: "string" } }, required: ["team"] }, execute: function (input) { var t = (input.team || "").toUpperCase(); if (!DEF[t]) return "Unknown team " + input.team; var out = TEAM_NAMES[t] + " defense: " + ["QB", "RB", "WR", "TE"].map(function (pos) { return pos + " " + f1(DEF[t][POS_IDX[pos]]) + "/g (rank #" + (RANK[t] ? RANK[t][pos] : "?") + ")"; }).join(", "); if (COV[t]) out += ". Coverage: " + COV[t][0] + "% man / " + COV[t][1] + "% zone (" + covLabel(covGroup(t)) + ")"; if (DEF_BLITZ[t]) out += ". Blitzes (5+ rushers) on " + DEF_BLITZ[t].blitz + "% of dropbacks, rank #" + blitzRank(t) + " (league " + DEF_BLITZ_LG.blitz + "%)"; return out + "."; } },
+    { name: "league_team", description: "A fantasy league team's roster and projected lineup this week, by team name.", inputSchema: { type: "object", properties: { team: { type: "string" } }, required: ["team"] }, execute: function (input) { var q = (input.team || "").toLowerCase(), T = state.teams.filter(function (t) { return t.name.toLowerCase().indexOf(q) >= 0; })[0]; if (!T) return "No league team matches " + input.team + ". Teams: " + state.teams.map(function (t) { return t.name; }).join(", "); var ps = teamPlayers(T), ol = oppLineup(T, ps); return T.name + " (" + (state.standings[T.id] ? (state.standings[T.id].w || 0) + "-" + (state.standings[T.id].l || 0) : "record n/a") + "), projected " + f1(ol.total) + ". Lineup: " + ol.lineup.map(function (l) { return l.slot + ": " + (l.ev ? l.ev.p.name + " " + f1(l.ev.val) : "empty"); }).join("; ") + ". Full roster: " + ps.map(function (p) { return p.name + " (" + p.pos + ")"; }).join(", "); } }
+  ];
+}
+var ASK_PROVIDER = null, askBusy = false, askCtl = null;
+function askProvider() {
+  if (ASK_PROVIDER !== null) return Promise.resolve(ASK_PROVIDER);
+  if (window.claude && typeof window.claude.use === "function") { return window.claude.use("sample").then(function (fn) { ASK_PROVIDER = fn ? { kind: "sample", fn: fn } : false; return ASK_PROVIDER; }).catch(function () { ASK_PROVIDER = false; return false; }); }
+  ASK_PROVIDER = false; return Promise.resolve(false);
+}
+function askDirectApi(messages, systemText) {
+  var key = (state.askKey || "").trim(); if (!key) return Promise.reject({ code: "no_key" });
+  return fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }, body: JSON.stringify({ model: state.askModel || "claude-sonnet-4-5", max_tokens: 900, system: systemText, messages: messages }) })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw { code: "api", message: (j && j.error && j.error.message) || r.statusText }; return (j.content || []).map(function (c) { return c.text || ""; }).join(""); }); });
+}
+function renderAsk() {
+  var el = $("#tab-ask"), log = state.askLog || [];
+  var h = '<div class="panel"><h2>Ask</h2><p class="note">Ask anything about your lineup, a player, a matchup or the league. The answer is written by Claude using the numbers on this page (your roster, projections, usage, matchup grades, this week’s opponent, waivers, NFL team tendencies and defenses), so it is grounded in the same data you see in the tabs. It is advice, not a crystal ball: it will tell you when a call is close.</p>';
+  h += '<div class="row" style="flex-wrap:wrap;gap:6px;margin-top:6px">' + ["Who should I start at FLEX this week?", "Which of my players has the toughest matchup?", "Best waiver pickups for my team?", "How does my matchup look against my opponent?", "Should I be worried about any of my players’ usage?", "Which NFL offenses will keep passing with a lead this week?"].map(function (q) { return '<button type="button" class="btn ghost small" data-askq="' + esc(q) + '">' + esc(q) + '</button>'; }).join("") + '</div>';
+  h += '<div id="askLog" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">' + log.map(function (m) { return '<div class="panel" style="padding:10px 12px;' + (m.role === "user" ? 'background:var(--surface-2);margin-left:10%' : 'margin-right:10%;border-left:3px solid var(--accent)') + '"><div class="muted small" style="margin-bottom:4px">' + (m.role === "user" ? 'You' : 'Answer') + '</div><div style="white-space:pre-wrap;line-height:1.45">' + esc(m.content) + '</div></div>'; }).join("") + '</div>';
+  h += '<div class="row" style="margin-top:12px;align-items:flex-end;gap:8px"><div class="grow"><label for="askInput">Your question</label><textarea id="askInput" rows="2" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;resize:vertical" placeholder="e.g. Tuten or Henry at RB2 this week?"></textarea></div><button class="btn" type="button" id="askSend"' + (askBusy ? ' disabled' : '') + '>Ask</button>' + (askBusy ? '<button class="btn ghost" type="button" id="askStop">Stop</button>' : '') + (log.length ? '<button class="btn ghost small" type="button" id="askClear">Clear</button>' : '') + '</div>';
+  h += '<div id="askStatus" class="note" style="margin-top:6px"></div>';
+  h += '<details class="more" style="margin-top:10px" id="askSetup"><summary class="muted small">Not working here? Connection options</summary><p class="note">Inside claude.ai this uses your own Claude account (you will be asked once to allow it). On a hosted copy of the page (like GitHub Pages) there is no Claude connection, so you can paste an Anthropic API key below; it is stored only in this browser and sent straight to Anthropic, never anywhere else.</p><div class="row" style="align-items:flex-end;gap:8px"><div style="width:360px"><label for="askKey">Anthropic API key (optional)</label><input type="password" id="askKey" value="' + esc(state.askKey || "") + '" placeholder="sk-ant-…" style="width:100%"></div><button class="btn small" type="button" id="askKeySave">Save key</button>' + (state.askKey ? '<button class="btn ghost small" type="button" id="askKeyClear">Remove</button>' : '') + '</div></details></div>';
+  el.innerHTML = h;
+  var logEl = $("#askLog"); if (logEl) logEl.scrollTop = logEl.scrollHeight;
+  Array.prototype.forEach.call(el.querySelectorAll("[data-askq]"), function (b) { b.onclick = function () { $("#askInput").value = b.getAttribute("data-askq"); askSend(); }; });
+  $("#askSend").onclick = askSend;
+  var inp = $("#askInput"); inp.onkeydown = function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); askSend(); } };
+  var st = $("#askStop"); if (st) st.onclick = function () { if (askCtl) askCtl.abort(); };
+  var cl = $("#askClear"); if (cl) cl.onclick = function () { state.askLog = []; save(); renderAsk(); };
+  var ks = $("#askKeySave"); if (ks) ks.onclick = function () { state.askKey = $("#askKey").value.trim(); save(); renderAsk(); $("#askStatus").textContent = state.askKey ? "Key saved in this browser." : ""; };
+  var kc = $("#askKeyClear"); if (kc) kc.onclick = function () { state.askKey = ""; save(); renderAsk(); };
+  askProvider().then(function (prov) { var s = $("#askStatus"); if (!s) return; if (prov && prov.kind === "sample") s.textContent = "Connected to Claude through your claude.ai account."; else if (state.askKey) s.textContent = "Using your saved API key."; else { s.innerHTML = "No Claude connection on this copy of the page yet: open the artifact in claude.ai, or add an API key under Connection options below."; var d = $("#askSetup"); if (d) d.open = true; } });
+}
+function askSend() {
+  var inp = $("#askInput"), q = (inp.value || "").trim(); if (!q || askBusy) return;
+  state.askLog = (state.askLog || []).concat([{ role: "user", content: q }]); state.askLog = state.askLog.slice(-20); save(); askBusy = true; renderAsk();
+  var status = $("#askStatus"); status.textContent = "Thinking…";
+  var ctx = askContext(), history = state.askLog.slice(-8);
+  var turns = history.map(function (m, i) { return { role: m.role, content: (i === history.length - 1 ? "CONTEXT:\n" + ctx + "\n\nQUESTION: " : "") + m.content }; });
+  var pending = { role: "assistant", content: "" }; state.askLog = state.askLog.concat([pending]); renderAsk(); var status2 = $("#askStatus"); if (status2) status2.textContent = "Thinking… (first use asks you to allow Claude; a full answer can take 10–60 seconds)";
+  var finish = function (text, err) { pending.content = text || (err ? "Could not get an answer" + (err.code === "not_granted" ? ": you declined the Claude connection." : err.code === "rate_limited" ? ": rate limited, try again in a moment." : err.code === "no_key" ? ": no connection and no API key." : err.message ? ": " + err.message : ".") : "(no answer)"); state.askLog = state.askLog.slice(-20); save(); askBusy = false; askCtl = null; renderAsk(); };
+  askProvider().then(function (prov) {
+    if (prov && prov.kind === "sample") {
+      askCtl = new AbortController();
+      return prov.fn(turns, { signal: askCtl.signal, cache: false, tools: askTools(), onText: function (t) { pending.content = t.text; var last = document.querySelector("#askLog > div:last-child div[style*='pre-wrap']"); if (last) last.textContent = t.text; } }).then(function (r) { finish(r.text); }).catch(function (e) { finish(e && e.text, e || {}); });
+    }
+    var sys = ctx; var msgs = history.map(function (m) { return { role: m.role, content: m.content }; });
+    return askDirectApi(msgs, sys + "\n\nAnswer in plain text with short paragraphs or a short list; no markdown headers.").then(function (text) { finish(text); }).catch(function (e) { finish(null, e || {}); });
+  });
+}
 /* ---------- LEAGUE TAB ---------- */
 function teamById(id) { for (var i = 0; i < state.teams.length; i++) if (state.teams[i].id === id) return state.teams[i]; return null; }
 function teamPlayers(t) { return t.roster.map(playerById).filter(Boolean); }
@@ -4894,6 +5000,7 @@ var GROUPS = [
   { id: "nfl", tabs: [["nfl", "NFL teams"]] },
   { id: "week", tabs: [["matchups", "Matchups"], ["report", "Injuries & weather"], ["sos", "Strength of schedule per position"]] },
   { id: "league", tabs: [["league", "League"]] },
+  { id: "ask", tabs: [["ask", "Ask"]] },
   { id: "custom", tabs: [["custom", "Customize"]] }
 ];
 function groupOf(t) { for (var i = 0; i < GROUPS.length; i++) for (var j = 0; j < GROUPS[i].tabs.length; j++) if (GROUPS[i].tabs[j][0] === t) return GROUPS[i]; return GROUPS[0]; }
@@ -4923,8 +5030,8 @@ document.addEventListener("toggle", function (e) {
 }, true);
 function showTab(t) {
   state.tab = t; state.lastTab = state.lastTab || {}; state.lastTab[groupOf(t).id] = t; renderNav(t); renderClaim();
-  ["lineup","players","usage","pstats","histopp","vsdef","nfl","matchups","sos","trade","league","report","custom"].forEach(function (k) { $("#tab-" + k).hidden = k !== t; $("#t-" + k).setAttribute("aria-selected", String(k === t)); });
-  ({ lineup: renderLineup, players: renderPlayers, usage: renderUsage, pstats: renderPlayerStats, histopp: renderHistOppTab, vsdef: renderVsDef, nfl: renderNflTeams, custom: renderCustomize, matchups: renderMatchups, sos: renderSos, trade: renderTrade, league: renderLeague, report: renderReport })[t]();
+  ["lineup","players","usage","pstats","histopp","vsdef","nfl","matchups","sos","trade","league","report","custom","ask"].forEach(function (k) { $("#tab-" + k).hidden = k !== t; $("#t-" + k).setAttribute("aria-selected", String(k === t)); });
+  ({ lineup: renderLineup, players: renderPlayers, usage: renderUsage, pstats: renderPlayerStats, histopp: renderHistOppTab, vsdef: renderVsDef, ask: renderAsk, nfl: renderNflTeams, custom: renderCustomize, matchups: renderMatchups, sos: renderSos, trade: renderTrade, league: renderLeague, report: renderReport })[t]();
 }
 Array.prototype.forEach.call(document.querySelectorAll("nav.tabs.legacy button"), function (b) { b.onclick = function () { showTab(b.getAttribute("data-tab")); }; });
 var PALETTES = [
