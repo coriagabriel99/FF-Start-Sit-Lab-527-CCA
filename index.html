@@ -417,7 +417,7 @@ body.sheet-open { overflow: hidden; }
     </div>
   </header>
   <div id="viewNote" class="panel" hidden style="margin-bottom:8px;border-left:4px solid var(--accent);padding:8px 12px;font-size:13.5px"></div>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="changeTeamBtn" style="margin-left:auto;display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 18, 16:58</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="changeTeamBtn" style="margin-left:auto;display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 18, 18:36</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -1608,13 +1608,15 @@ function why(ev) {
   if (!ev.out) parts.push("Projected " + f1(ev.proj) + " fantasy points this week (" + basisLabel() + "); averaging " + f1(scoredPpg(p)) + " fantasy points per game this season" + (ev.projR != null && Math.abs(ev.projR - ev.projS) >= 2 ? "; recent form (last " + ev.rf.n + " games) points to " + f1(ev.projR) + " vs " + f1(ev.projS) + " season-based" : "") + ".");
   if (ev.inj) parts.push(ev.inj.n);
   var opp = ev.opp;
-  if (p.pos === "K") { parts.push(p.team + "’s implied team total is " + f1(ev.impl) + " points (#" + ev.implRank + " of 28 teams), which sets the kicking chances."); return parts.join(" "); }
-  if (p.pos === "DST") { parts.push("Facing " + opp + ", whose implied team total is " + f1(ev.oppImpl) + " points (#" + ev.oppImplRank + " of 28); lower is better for a defense."); return parts.join(" "); }
+  var nT = Object.keys(SCHED).length || 28, hasLine = ev.impl != null && !isNaN(ev.impl) && !(SCHED[p.team] && SCHED[p.team].noLine);
+  if (p.pos === "K") { parts.push(hasLine ? p.team + "’s implied team total is " + f1(ev.impl) + " points (#" + ev.implRank + " of " + nT + " teams), which sets the kicking chances." : "No Vegas line yet for this game, so the kicking chances are rated as average."); return parts.join(" "); }
+  if (p.pos === "DST") { var hasOpp = ev.oppImpl != null && !isNaN(ev.oppImpl) && !(SCHED[opp] && SCHED[opp].noLine); parts.push(hasOpp ? "Facing " + opp + ", whose implied team total is " + f1(ev.oppImpl) + " points (#" + ev.oppImplRank + " of " + nT + "); lower is better for a defense." : "Facing " + opp + "; no Vegas line yet, so the game environment is rated as average."); return parts.join(" "); }
   if (ev.M >= 0.08) parts.push(opp + " allow " + f1(ev.allowed) + " fantasy points per game to " + p.pos + "s, #" + ev.defRank + " most of 32.");
   else if (ev.M <= -0.08) parts.push(opp + " shut down " + p.pos + "s (" + f1(ev.allowed) + " fantasy points per game, #" + ev.defRank + " of 32).");
   else parts.push(opp + " are about average against " + p.pos + "s (#" + ev.defRank + ").");
-  if (ev.E >= 0.08) parts.push(p.team + "’s implied team total is " + f1(ev.impl) + " points, #" + ev.implRank + " of 28 teams.");
-  else if (ev.E <= -0.08) parts.push("Low-scoring spot: " + p.team + "’s implied team total is just " + f1(ev.impl) + " points (#" + ev.implRank + " of 28).");
+  if (hasLine && ev.E >= 0.08) parts.push(p.team + "’s implied team total is " + f1(ev.impl) + " points, #" + ev.implRank + " of " + nT + " teams.");
+  else if (hasLine && ev.E <= -0.08) parts.push("Low-scoring spot: " + p.team + "’s implied team total is just " + f1(ev.impl) + " points (#" + ev.implRank + " of " + nT + ").");
+  else if (!hasLine && !ev.final) parts.push("No Vegas line for this game, so the game environment is rated as average.");
   return parts.join(" ");
 }
 function oppText(ev) { return ev.bye ? "BYE" : (ev.home ? "vs " : "at ") + ev.opp; }
@@ -2634,6 +2636,97 @@ function commitImport(replace) {
 }
 /* ---------- TRADE SUGGESTIONS ---------- */
 var WP_CACHE = {};
+/* ---------- TRADE REALISM: what the other side actually gains, and stat-driven targeting ---------- */
+// Which of these players would start for a roster over the rest of the season (ROS points per game, this league's slots)?
+function rosStarters(players) {
+  var c = players.map(function (p) { var r = playerRos(p); return { p: p, v: r.games ? r.pts / r.games : 0 }; }).filter(function (x) { return x.v > 0; }).sort(function (a, b) { return b.v - a.v; });
+  var used = {};
+  ["QB", "RB", "WR", "TE", "K", "DST"].forEach(function (pos) { var n = state.slots[pos] || 0, k = 0; c.forEach(function (x) { if (k < n && x.p.pos === pos && !used[x.p.id]) { used[x.p.id] = 1; k++; } }); });
+  var fill = function (n, ok) { var k = 0; c.forEach(function (x) { if (k < n && ok(x.p.pos) && !used[x.p.id]) { used[x.p.id] = 1; k++; } }); };
+  fill(state.slots.FLEX || 0, function (pos) { return pos === "RB" || pos === "WR" || pos === "TE"; });
+  fill(state.slots.SF || 0, function (pos) { return pos === "QB" || pos === "RB" || pos === "WR" || pos === "TE"; });
+  return used;
+}
+// Market value of what I send, as the receiving team would see it: full for players who start for them, discounted for depth;
+// a quarterback they would not start is worth very little in a one-QB league.
+function usefulValue(team, give, get) {
+  if (!team) return mval(give);
+  var rIds = {}; (get || []).forEach(function (p) { rIds[p.id] = 1; });
+  var after = teamPlayers(team).filter(function (p) { return !rIds[p.id]; }).concat(give), starters = rosStarters(after), v = 0;
+  give.forEach(function (p) { var m = marketValue(p) || 0; if (starters[p.id]) v += m; else if (p.pos === "QB") v += m * ((state.slots.SF || 0) ? 0.6 : 0.15); else v += m * 0.45; });
+  return v;
+}
+function usefulValueMine(get, give) {
+  var gIds = {}; (give || []).forEach(function (p) { gIds[p.id] = 1; });
+  var after = state.roster.map(playerById).filter(Boolean).filter(function (p) { return !gIds[p.id]; }).concat(get), starters = rosStarters(after), v = 0;
+  get.forEach(function (p) { var m = marketValue(p) || 0; if (starters[p.id]) v += m; else if (p.pos === "QB") v += m * ((state.slots.SF || 0) ? 0.6 : 0.15); else v += m * 0.45; });
+  return v;
+}
+function bestQbPpg(players) { var best = 0; players.forEach(function (p) { if (p.pos !== "QB" || isInactive(p)) return; var r = playerRos(p); var v = r.games ? r.pts / r.games : 0; if (v > best) best = v; }); return best; }
+// a quarterback coming to me only counts if my QB spot is genuinely weak or he is a big jump
+function qbRuleMineOK(get) {
+  var qbs = get.filter(function (p) { return p.pos === "QB"; }); if (!qbs.length) return true;
+  if (state.slots.SF) return true;
+  var mine = state.roster.map(playerById).filter(Boolean), base = teamTotals(mine).total, ws = tradeWsum();
+  return qbs.every(function (q) { return bestQbPpg(mine) < QB_WEAK || (teamTotals(mine.concat([q])).total - base) / ws >= QB_SIGNIFICANT; });
+}
+/* ---------- ROSTER DEPTH: what a trade does to my bench, bye coverage and injury cover (folded into the grade, not shown) ---------- */
+function rosPpg(p) { var r = playerRos(p); return r.games ? r.pts / r.games : 0; }
+// bench strength: for each slot group, how good the next men up are (points above replacement), with byes and injury timelines already in the ROS numbers
+function depthValue(players) {
+  var starters = rosStarters(players), bench = players.filter(function (p) { return SKILL[p.pos] && !starters[p.id]; });
+  var v = 0;
+  ["RB", "WR", "TE", "QB"].forEach(function (pos) {
+    var b = bench.filter(function (p) { return p.pos === pos; }).map(rosPpg).sort(function (a, b2) { return b2 - a; });
+    var repl = REPL_POS[pos] || 0, w1 = pos === "QB" ? (state.slots.SF ? 0.6 : 0.25) : 0.6, w2 = pos === "QB" ? 0 : 0.3;
+    if (b[0] != null) v += w1 * Math.max(0, b[0] - repl);
+    if (b[1] != null) v += w2 * Math.max(0, b[1] - repl);
+  });
+  return v;
+}
+var DEPTH_WEIGHT = 0.4;   // one point of bench depth per game is worth this much of a point of lineup gain per week
+function depthPenalty(give, get) {
+  var gIds = {}; give.forEach(function (p) { gIds[p.id] = 1; });
+  var before = state.roster.map(playerById).filter(Boolean), after = before.filter(function (p) { return !gIds[p.id]; }).concat(get);
+  var loss = depthValue(before) - depthValue(after);          // positive = thinner bench after the deal
+  var starters = rosStarters(before), nStart = give.filter(function (p) { return starters[p.id]; }).length;
+  var consolidation = (give.length > get.length && nStart >= 2) ? 0.8 : 0;   // two real starters for one: extra caution
+  return Math.max(0, loss) * DEPTH_WEIGHT + consolidation;
+}
+// the grade used for filtering and ranking: lineup gain minus what the deal costs my depth
+function meAdj(x) { if (x.meAdj == null) x.meAdj = x.me - depthPenalty(x.give, x.get); return x.meAdj; }
+// How much a quarterback alone would raise the other team's best lineup per week.
+function qbGainFor(team, qb) { var th = teamPlayers(team); return (teamTotals(th.concat([qb])).total - teamTotals(th).total) / tradeWsum(); }
+var QB_SIGNIFICANT = 6.0;   // points per week a QB must add to the other side's lineup to belong in a package: a tier jump, not a nudge
+var QB_WEAK = 14.0;         // a team whose best QB projects under this per game is genuinely shopping for one
+function qbRuleOK(team, give) {
+  var qbs = give.filter(function (p) { return p.pos === "QB"; }); if (!qbs.length) return true;
+  if (!team) return false;                                   // no roster to judge: leave QBs out of packages
+  if (state.slots.SF) return true;                            // superflex leagues start two, so a QB is always useful
+  var th = teamPlayers(team), weak = bestQbPpg(th) < QB_WEAK;
+  return qbs.every(function (q) { return weak || qbGainFor(team, q) >= QB_SIGNIFICANT; });
+}
+// Stat signals behind a deal: hot or cold form, usage trend, garbage-time inflation, remaining schedule, availability.
+function statFlags(p) {
+  var sc = 0, t = [], rf = recentForm(p), avg = scoredPpg(p);
+  if (rf && rf.avg != null && avg) { var d = (rf.avg - avg) / Math.max(5, avg); if (d > 0.15) { sc += 1; t.push("hot: " + f1(rf.avg) + " pts/g last 3 vs " + f1(avg) + " season"); } else if (d < -0.15) { sc -= 1; t.push("cold: " + f1(rf.avg) + " pts/g last 3 vs " + f1(avg) + " season"); } }
+  var us = trendShift(p, "usage"), unit = p.pos === "RB" ? "touches" : p.pos === "QB" ? "pass attempts" : "targets";
+  if (us && us.d >= 2) { sc += 1; t.push(unit + " up to " + f1(us.last) + " a game from " + f1(us.prior)); } else if (us && us.d <= -2) { sc -= 1; t.push(unit + " down to " + f1(us.last) + " a game from " + f1(us.prior)); }
+  var g = garbage(p); if (g && g.heavy) { sc -= 1; t.push(Math.round(g.share * 100) + "% garbage-time points"); }
+  var r = rosIndex(p.team, p.pos, CUR, ROS_END); if (r != null && r >= 0.08) { sc += 1; t.push("soft schedule"); } else if (r != null && r <= -0.08) { sc -= 1; t.push("tough schedule"); }
+  var d2 = distro(p); if (d2 && d2.bust >= 0.4) { sc -= 0.5; t.push("busts in " + Math.round(d2.bust * 100) + "% of games"); }
+  if (isInactive(p)) { sc -= 2; t.push("inactive"); }
+  if (INJ[p.id] && INJ[p.id].s === "OUT") { sc -= 1; t.push("out"); }
+  return { score: sc, text: t.join(", ") };
+}
+function surname(p) { var parts = p.name.replace(/\./g, "").split(/\s+/).filter(function (t) { return !/^(jr|sr|ii|iii|iv|v)$/i.test(t); }); return parts[parts.length - 1] || p.name; }
+function dealSignal(give, get) {
+  var sc = 0, bits = [];
+  get.forEach(function (p) { var f = statFlags(p); sc += f.score; if (f.text) bits.push("get " + surname(p) + ": " + f.text); });
+  give.forEach(function (p) { var f = statFlags(p); sc -= f.score; if (f.text) bits.push("send " + surname(p) + ": " + f.text); });
+  return { score: sc, text: bits.join(" · ") };
+}
+function whyCell(x) { var sg = x.sig || dealSignal(x.give, x.get); return '<td class="small" style="max-width:260px;white-space:normal;color:var(--muted)">' + (sg.text ? esc(sg.text) : '<span class="na">–</span>') + '</td>'; }
 function tradeWsum() { var s = 0; for (var w = CUR; w <= ROS_END; w++) s += wt(w); return s; }
 function suggestTrades(partner, mode) {
   var mine = state.roster.map(playerById).filter(Boolean).filter(tradeable);
@@ -2656,11 +2749,15 @@ function suggestTrades(partner, mode) {
       for (var k = 0; k < theirs.length; k++) for (var m = k + 1; m < theirs.length; m++) mine.forEach(function (a) { ev([a], [theirs[k], theirs[m]]); });
     }
   });
-  out.forEach(function (x) { x.vg = mval(x.give); x.vr = mval(x.get); var prem = x.give.length > x.get.length ? 1.1 : x.give.length < x.get.length ? 0.92 : 1; x.ratio = x.vr ? (x.vg / x.vr) / prem : 9; });
-  out = out.filter(function (x) { return bestPlayerOK(x.give, x.get); });
-  var list = mode === "fair" ? out.filter(function (x) { return x.me >= 0.3 && x.them >= themFloor(x.team) && x.ratio >= minRatio(x.team); }).sort(function (a, b) { return Math.min(b.me, b.them) - Math.min(a.me, a.them) || b.me - a.me; })
-                             : out.filter(function (x) { return x.me >= 0.3 && x.them >= (stanceOf(x.team) === "stingy" ? 0 : -1.5) && x.ratio >= minRatio(x.team) && x.ratio <= 1.35; }).sort(function (a, b) { return b.me - a.me; });
-  return list.slice(0, 20);
+  out = out.filter(function (x) { return bestPlayerOK(x.give, x.get) && qbRuleOK(x.team, x.give) && qbRuleMineOK(x.get); });
+  out.forEach(function (x) { x.vg = usefulValue(x.team, x.give, x.get); x.vr = usefulValueMine(x.get, x.give); var prem = x.give.length > x.get.length ? 1.1 : x.give.length < x.get.length ? 0.92 : 1; x.ratio = x.vr ? (x.vg / x.vr) / prem : 9; x.sig = dealSignal(x.give, x.get); });
+  var list = mode === "fair" ? out.filter(function (x) { return meAdj(x) >= 0.3 && x.them >= themFloor(x.team) && x.ratio >= minRatio(x.team); }).sort(function (a, b) { return (Math.min(meAdj(b), b.them) + 0.15 * b.sig.score) - (Math.min(meAdj(a), a.them) + 0.15 * a.sig.score) || meAdj(b) - meAdj(a); })
+                             : out.filter(function (x) { return meAdj(x) >= 0.3 && x.them >= (stanceOf(x.team) === "stingy" ? 0 : -1.5) && x.ratio >= minRatio(x.team) && x.ratio <= 1.35; }).sort(function (a, b) { return (meAdj(b) + 0.15 * b.sig.score) - (meAdj(a) + 0.15 * a.sig.score); });
+  // keep a spread of targets: no more than three deals for the same incoming player, and mid-value pieces get a seat
+  var seen = {}, picked = [];
+  list.forEach(function (x) { var k = x.get.map(function (q) { return q.id; }).sort().join("+"); if ((seen[k] || 0) < 3) { seen[k] = (seen[k] || 0) + 1; picked.push(x); } });
+  var mids = picked.filter(function (x) { return x.vr <= 55; }), stars = picked.filter(function (x) { return x.vr > 55; });
+  return stars.slice(0, 12).concat(mids.slice(0, 8)).sort(function (a, b) { return (Math.min(meAdj(b), b.them) + 0.15 * b.sig.score) - (Math.min(meAdj(a), a.them) + 0.15 * a.sig.score); }).slice(0, 20);
 }
 function tradeTargets() {
   var myAll = state.roster.map(playerById).filter(Boolean); if (!myAll.length) return { adds: [], drops: [] };
@@ -2686,9 +2783,9 @@ function renderSuggestions(partner) {
     h += '<p class="note" style="margin-top:8px">Players at ' + esc(state.upPos || "RB") + (state.teams.length ? ' on your leaguemates’ rosters' : ' across the league') + ' who would raise your projected best lineup over the chosen window, each paired with the offer from your roster that is realistic on market value (85–135% of his value, with the 2-for-1 premium and the best-player rule). Gain is per week over the window' + (state.upHorizon === "po" ? ', so a player who returns from injury by Week 15 counts in full' : '') + '.</p>';
     if (!ups.length) h += '<div class="empty" style="margin-top:10px">No realistic ' + esc(state.upPos || "RB") + ' upgrade found for that window. Try the other goal, another position, or add leaguemates’ rosters.</div>';
     else {
-      h += '<div class="tablewrap" style="margin-top:8px"><table><thead><tr><th>Target</th>' + (state.teams.length ? '<th>Owner</th>' : '') + '<th>You send</th><th class="num" title="Market value sent → received">Value</th><th class="num" title="Change in your projected best lineup per week over the window">You gain / wk</th>' + (state.teams.length ? '<th class="num" title="Change in their projected best lineup per week, rest of season">Them / wk</th>' : '') + '<th></th></tr></thead><tbody>';
+      h += '<div class="tablewrap" style="margin-top:8px"><table><thead><tr><th>Target</th>' + (state.teams.length ? '<th>Owner</th>' : '') + '<th>You send</th><th class="num" title="Market value sent → received">Value</th><th class="num" title="Change in your projected best lineup per week over the window">You gain / wk</th>' + (state.teams.length ? '<th class="num" title="Change in their projected best lineup per week, rest of season">Them / wk</th>' : '') + '<th title="The stats behind the deal">Why</th><th></th></tr></thead><tbody>';
       ups.forEach(function (x) { var i = renderSuggestions.last.length; renderSuggestions.last.push(x);
-        h += '<tr><td>' + sugName(x.get) + ' ' + marketChip(x.get[0]) + '</td>' + (state.teams.length ? '<td>' + ownerLabel(x.team) + '</td>' : '') + '<td>' + sugName(x.give) + '</td><td class="num">' + x.vg + ' → ' + x.vr + '</td><td class="num" style="color:#0b7a5c">+' + f1(x.me) + '</td>' + (state.teams.length ? '<td class="num" style="color:' + (x.them == null ? 'inherit' : x.them >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (x.them == null ? '<span class="na">–</span>' : (x.them >= 0 ? '+' : '−') + f1(Math.abs(x.them))) + '</td>' : '') + '<td><button type="button" class="btn small" data-sload="' + i + '">Load</button></td></tr>'; });
+        h += '<tr><td>' + sugName(x.get) + ' ' + marketChip(x.get[0]) + '</td>' + (state.teams.length ? '<td>' + ownerLabel(x.team) + '</td>' : '') + '<td>' + sugName(x.give) + '</td><td class="num">' + x.vg + ' → ' + x.vr + '</td><td class="num" style="color:#0b7a5c">+' + f1(x.me) + '</td>' + (state.teams.length ? '<td class="num" style="color:' + (x.them == null ? 'inherit' : x.them >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (x.them == null ? '<span class="na">–</span>' : (x.them >= 0 ? '+' : '−') + f1(Math.abs(x.them))) + '</td>' : '') + whyCell(x) + '<td><button type="button" class="btn small" data-sload="' + i + '">Load</button></td></tr>'; });
       h += '</tbody></table></div>';
     }
     return h + '</details>';
@@ -2743,10 +2840,10 @@ function renderSuggestions(partner) {
   var pt = teamById(state.sugTeam), list = suggestTrades(pt, state.sugMode === "best" ? "best" : "fair");
   if (!list.length) h += '<p class="note" style="margin-top:10px">' + (state.sugMode === "best" ? 'No swap improves your lineup by at least 0.3 a week, costs them no more than 1.5, and stays within market value (you send 85–135% of what you get).' : 'No swap helps you by at least 0.3 a week while keeping them within 0.3 and sending at least 85% of the market value you get back. Try “Best for you,” or pick one team to include 2-for-1 deals.') + '</p>';
   else {
-    h += '<p class="note" style="margin-top:8px">' + (pt ? '1-for-1 and 2-for-1 deals with ' + esc(pt.name) : (state.teams.length <= 6 ? '1-for-1 and 2-for-1 deals across the league' : '1-for-1 deals across the league; pick a team to add 2-for-1 options')) + '. Every deal here also passes a market check: what you send is worth at least 85% of what you get on FantasyCalc’s real-trade values' + (state.sugMode === "best" ? ' and no more than 135%' : '') + ', so the other manager has a reason to accept. Each line shows the change in projected best-lineup points per week through Week ' + ROS_END + '. Tap Load to see the full grade.</p>';
-    h += '<div class="tablewrap"><table><thead><tr><th>You send</th><th>You get</th><th>From</th><th class="num" title="Market trade value sent → received (FantasyCalc, real trades)">Value</th><th class="num">You</th><th class="num">Them</th><th></th></tr></thead><tbody>';
+    h += '<p class="note" style="margin-top:8px">' + (pt ? '1-for-1 and 2-for-1 deals with ' + esc(pt.name) : (state.teams.length <= 6 ? '1-for-1 and 2-for-1 deals across the league' : '1-for-1 deals across the league; pick a team to add 2-for-1 options')) + '. Every deal here also passes a market check: what you send is worth at least 85% of what you get on FantasyCalc’s real-trade values, counted the way the other manager would use it (a player who would sit on their bench counts for less, and a quarterback they would not start counts for very little, so a QB only appears in a package when he is a real upgrade for them)' + (state.sugMode === "best" ? ' and no more than 135%' : '') + ', so the other manager has a reason to accept. Each line shows the change in projected best-lineup points per week through Week ' + ROS_END + '. Tap Load to see the full grade.</p>';
+    h += '<div class="tablewrap"><table><thead><tr><th>You send</th><th>You get</th><th>From</th><th class="num" title="Market trade value sent → received (FantasyCalc, real trades). What you send is counted as the other team would use it: full value for players who start for them, less for depth, very little for a quarterback they would not start.">Value</th><th class="num">You</th><th class="num">Them</th><th title="The stats behind the deal: recent form vs season, usage trend, garbage-time share, remaining schedule, bust rate, availability">Why</th><th></th></tr></thead><tbody>';
     list.forEach(function (x, i) {
-      h += '<tr><td>' + sugName(x.give) + '</td><td>' + sugName(x.get) + '</td><td>' + esc(x.team.name) + '</td><td class="num">' + sideSummary(x.give).value + ' → ' + sideSummary(x.get).value + '</td><td class="num" style="color:#0b7a5c">+' + f1(x.me) + '</td><td class="num" style="color:' + (x.them >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (x.them >= 0 ? '+' : '−') + f1(Math.abs(x.them)) + '</td><td><button type="button" class="btn small" data-sload="' + i + '">Load</button></td></tr>';
+      h += '<tr><td>' + sugName(x.give) + '</td><td>' + sugName(x.get) + '</td><td>' + esc(x.team.name) + '</td><td class="num">' + Math.round(x.vg) + ' → ' + Math.round(x.vr) + '</td><td class="num" style="color:#0b7a5c">+' + f1(x.me) + '</td><td class="num" style="color:' + (x.them >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (x.them >= 0 ? '+' : '−') + f1(Math.abs(x.them)) + '</td>' + whyCell(x) + '<td><button type="button" class="btn small" data-sload="' + i + '">Load</button></td></tr>';
     });
     h += '</tbody></table></div>';
     renderSuggestions.last = list;
@@ -2759,7 +2856,7 @@ function ownerOf(pid) { for (var i = 0; i < state.teams.length; i++) if (state.t
 function pairsOf(arr) { var out = []; for (var i = 0; i < arr.length; i++) for (var j = i + 1; j < arr.length; j++) out.push([arr[i], arr[j]]); return out; }
 function triplesOf(arr) { var out = []; for (var i = 0; i < arr.length; i++) for (var j = i + 1; j < arr.length; j++) for (var k = j + 1; k < arr.length; k++) out.push([arr[i], arr[j], arr[k]]); return out; }
 function lockedNow(p) { return !!(p && ACTUAL[p.id]); }
-function tradeable(p) { return SKILL[p.pos] && !(state.excludeLocked !== false && lockedNow(p)); }
+function tradeable(p) { return SKILL[p.pos] && !(state.excludeLocked !== false && lockedNow(p)) && !isInactive(p) && !(INJ[p.id] && INJ[p.id].s === "OUT" && OUT_THRU[p.id] && OUT_THRU[p.id] >= ROS_END); }
 function lockTag(p) { return lockedNow(p) ? '<span class="tag wx" title="His Week ' + CUR + ' game is final, so most platforms lock him until the week ends (Tuesday). A trade can be proposed now but would process next week.">Locked</span>' : ''; }
 function tradeCtx() {
   var myAll = state.roster.map(playerById).filter(Boolean);
@@ -2769,7 +2866,7 @@ function evalDeal(ctx, team, thAll, tbase, give, get) {
   var gIds = {}, rIds = {}; give.forEach(function (p) { gIds[p.id] = 1; }); get.forEach(function (p) { rIds[p.id] = 1; });
   var me = (teamTotals(ctx.myAll.filter(function (p) { return !gIds[p.id]; }).concat(get)).total - ctx.base) / ctx.wsum;
   var them = (teamTotals(thAll.filter(function (p) { return !rIds[p.id]; }).concat(give)).total - tbase) / ctx.wsum;
-  return { team: team, give: give, get: get, me: me, them: them };
+  return { team: team, give: give, get: get, me: me, them: them, ok: qbRuleOK(team, give) && qbRuleMineOK(get) };
 }
 function buyOptions(target) {
   var owner = ownerOf(target.id); if (!owner) return null;
@@ -2797,19 +2894,20 @@ function sellOptions(mineP) {
 }
 function dealRows(list, showTeam) {
   if (!list.length) return '<p class="note" style="margin-top:6px">Nothing here.</p>';
-  var h = '<div class="tablewrap"><table><thead><tr><th>You send</th><th>You get</th>' + (showTeam ? '<th>From</th>' : '') + '<th class="num" title="Market trade value sent → received (FantasyCalc, real trades)">Value</th><th class="num">You</th><th class="num">Them</th><th></th></tr></thead><tbody>';
+  var h = '<div class="tablewrap"><table><thead><tr><th>You send</th><th>You get</th>' + (showTeam ? '<th>From</th>' : '') + '<th class="num" title="Market trade value sent → received, with what you send counted as the other team would use it (full for their starters, less for depth, very little for a quarterback they would not start)">Value</th><th class="num">You</th><th class="num">Them</th><th title="The stats behind the deal">Why</th><th></th></tr></thead><tbody>';
   list.forEach(function (x) {
     var i = renderSuggestions.last.length; renderSuggestions.last.push(x);
-    h += '<tr><td>' + sugName(x.give) + '</td><td>' + sugName(x.get) + '</td>' + (showTeam ? '<td>' + ownerLabel(x.team) + '</td>' : '') + '<td class="num">' + sideSummary(x.give).value + ' → ' + sideSummary(x.get).value + '</td><td class="num" style="color:' + (x.me >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (x.me >= 0 ? '+' : '−') + f1(Math.abs(x.me)) + '</td><td class="num" style="color:' + (x.them >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (x.them >= 0 ? '+' : '−') + f1(Math.abs(x.them)) + '</td><td><button type="button" class="btn small" data-sload="' + i + '">Load</button></td></tr>';
+    h += '<tr><td>' + sugName(x.give) + '</td><td>' + sugName(x.get) + '</td>' + (showTeam ? '<td>' + ownerLabel(x.team) + '</td>' : '') + '<td class="num">' + Math.round(x.vg != null ? x.vg : sideSummary(x.give).value) + ' → ' + Math.round(x.vr != null ? x.vr : sideSummary(x.get).value) + '</td><td class="num" style="color:' + (x.me >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (x.me >= 0 ? '+' : '−') + f1(Math.abs(x.me)) + '</td><td class="num" style="color:' + (x.them >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (x.them >= 0 ? '+' : '−') + f1(Math.abs(x.them)) + '</td>' + whyCell(x) + '<td><button type="button" class="btn small" data-sload="' + i + '">Load</button></td></tr>';
   });
   return h + '</tbody></table></div>';
 }
 function groupedDeals(list, showTeam) {
-  list.forEach(function (x) { x.vg = mval(x.give); x.vr = mval(x.get); var prem = x.give.length > x.get.length ? 1.1 : x.give.length < x.get.length ? 0.92 : 1; x.ratio = x.vr ? (x.vg / x.vr) / prem : 9; });
-  var ok = list.filter(function (x) { return x.me >= 0.2 && x.them >= themFloor(x.team) && x.ratio >= minRatio(x.team) && bestPlayerOK(x.give, x.get); }).sort(function (a, b) { return b.me - a.me; }).slice(0, 20);
+  list = list.filter(function (x) { return x.ok !== false && qbRuleOK(x.team, x.give) && qbRuleMineOK(x.get); });
+  list.forEach(function (x) { x.vg = usefulValue(x.team, x.give, x.get); x.vr = usefulValueMine(x.get, x.give); var prem = x.give.length > x.get.length ? 1.1 : x.give.length < x.get.length ? 0.92 : 1; x.ratio = x.vr ? (x.vg / x.vr) / prem : 9; x.sig = dealSignal(x.give, x.get); });
+  var ok = list.filter(function (x) { return meAdj(x) >= 0.2 && x.them >= themFloor(x.team) && x.ratio >= minRatio(x.team) && bestPlayerOK(x.give, x.get); }).sort(function (a, b) { return (meAdj(b) + 0.15 * b.sig.score) - (meAdj(a) + 0.15 * a.sig.score); }).slice(0, 20);
   list = list.filter(function (x) { return bestPlayerOK(x.give, x.get); });
-  var favor = list.filter(function (x) { return stanceOf(x.team) !== "stingy" && x.me >= 0.2 && (x.them < themFloor(x.team) || x.ratio < minRatio(x.team)) && x.them >= -2.0 && x.ratio >= 0.8; }).sort(function (a, b) { return b.ratio - a.ratio; }).slice(0, 12);
-  var overpay = list.filter(function (x) { return x.me < 0.2 && x.me >= -1.5 && x.them >= themFloor(x.team) && x.ratio >= minRatio(x.team); }).sort(function (a, b) { return b.me - a.me; }).slice(0, 12);
+  var favor = list.filter(function (x) { return stanceOf(x.team) !== "stingy" && meAdj(x) >= 0.2 && (x.them < themFloor(x.team) || x.ratio < minRatio(x.team)) && x.them >= -2.0 && x.ratio >= 0.8; }).sort(function (a, b) { return b.ratio - a.ratio; }).slice(0, 12);
+  var overpay = list.filter(function (x) { return meAdj(x) < 0.2 && meAdj(x) >= -1.5 && x.them >= themFloor(x.team) && x.ratio >= minRatio(x.team); }).sort(function (a, b) { return meAdj(b) - meAdj(a); }).slice(0, 12);
   var h = '<h3 style="margin-top:12px">Deals they should take</h3><p class="note">You gain, their lineup stays within 0.3 a week, and you send at least 85% of the market value you get back.</p>' + dealRows(ok, showTeam);
   h += '<h3 style="margin-top:14px">Deals that favor you</h3><p class="note">Worth asking, but they give up more than 0.3 a week or you send less than 85% of market value.</p>' + dealRows(favor, showTeam);
   if (overpay.length) h += '<h3 style="margin-top:14px">If you have to overpay</h3><p class="note">These cost you a little but they would likely accept.</p>' + dealRows(overpay, showTeam);
@@ -3103,24 +3201,26 @@ function bestPlayerOK(give, get) {
 function valueDeal(ctx, give, get) {
   var gIds = {}; give.forEach(function (p) { gIds[p.id] = 1; });
   var me = (teamTotals(ctx.myAll.filter(function (p) { return !gIds[p.id]; }).concat(get)).total - ctx.base) / ctx.wsum;
-  var vg = valueOf(give), vr = valueOf(get);
+  var team = ownerOf(get[0].id), vg = usefulValue(team, give, get), vr = usefulValueMine(get, give);
   var prem = give.length > get.length ? 1.1 : give.length < get.length ? 0.92 : 1;
-  return { team: ownerOf(get[0].id), give: give, get: get, me: me, vg: vg, vr: vr, ratio: vr ? (vg / vr) / prem : 9, them: vg - vr, prem: prem };
+  return { team: team, give: give, get: get, me: me, vg: vg, vr: vr, ratio: vr ? (vg / vr) / prem : 9, them: vg - vr, prem: prem, ok: qbRuleOK(team, give) && qbRuleMineOK(get), sig: dealSignal(give, get) };
 }
 function buyOptionsValue(target) {
   var ctx = tradeCtx(), out = [], tv = marketValue(target) || 1;
   var pkgs = ctx.mine.map(function (a) { return [a]; }).concat(pairsOf(ctx.mine));
   if (ctx.mine.length <= 16) pkgs = pkgs.concat(triplesOf(ctx.mine));
-  pkgs.forEach(function (pk) { var v = valueOf(pk); if (v >= 0.85 * tv && v <= 1.6 * tv) out.push(valueDeal(ctx, pk, [target])); });
-  var owner = ownerOf(target.id), extras = owner ? teamPlayers(owner).filter(function (p) { return tradeable(p) && p.id !== target.id; }) : [];
-  if (extras.length) pairsOf(ctx.mine).forEach(function (pr) { extras.forEach(function (b) { var v = valueOf(pr), tv2 = tv + (marketValue(b) || 0); if (v >= 0.85 * tv2 && v <= 1.3 * tv2) out.push(valueDeal(ctx, pr, [target, b])); }); });
+  var owner0 = ownerOf(target.id);
+  pkgs.forEach(function (pk) { if (!qbRuleOK(owner0, pk)) return; var v = usefulValue(owner0, pk, [target]); if (v >= 0.85 * tv && v <= 1.6 * tv) { var d = valueDeal(ctx, pk, [target]); if (d.ok) out.push(d); } });
+  var owner = owner0, extras = owner ? teamPlayers(owner).filter(function (p) { return tradeable(p) && p.id !== target.id; }) : [];
+  if (extras.length) pairsOf(ctx.mine).forEach(function (pr) { if (!qbRuleOK(owner, pr)) return; extras.forEach(function (b) { var v = usefulValue(owner, pr, [target, b]), tv2 = tv + (marketValue(b) || 0); if (v >= 0.85 * tv2 && v <= 1.3 * tv2) { var d = valueDeal(ctx, pr, [target, b]); if (d.ok) out.push(d); } }); });
   return out;
 }
 function sellOptionsValue(mineP) {
   var ctx = tradeCtx(), out = [], pv = marketValue(mineP) || 1, pool = (state.teams.length ? leaguePool() : poolPlayers()).filter(function (p) { return p.id !== mineP.id; });
-  pool.forEach(function (b) { var v = marketValue(b) || 0; if (v >= 0.7 * pv && v <= 1.25 * pv) out.push(valueDeal(ctx, [mineP], [b])); });
+  pool = pool.filter(tradeable);
+  pool.forEach(function (b) { var v = marketValue(b) || 0; if (v >= 0.7 * pv && v <= 1.25 * pv) { var d = valueDeal(ctx, [mineP], [b]); if (d.ok) out.push(d); } });
   var top = pool.slice().sort(function (a, b) { return (marketValue(b) || 0) - (marketValue(a) || 0); }).slice(0, 45);
-  pairsOf(top).forEach(function (pr) { var v = valueOf(pr); if (v >= 0.85 * pv && v <= 1.25 * pv) out.push(valueDeal(ctx, [mineP], pr)); });
+  pairsOf(top).forEach(function (pr) { var v = valueOf(pr); if (v >= 0.85 * pv && v <= 1.25 * pv) { var d = valueDeal(ctx, [mineP], pr); if (d.ok) out.push(d); } });
   var others = ctx.mine.filter(function (p) { return p.id !== mineP.id; });
   pool.forEach(function (b) { var v = marketValue(b) || 0; if (v > pv) others.forEach(function (a) { var vg = pv + (marketValue(a) || 0); if (vg >= 0.85 * v && vg <= 1.3 * v) out.push(valueDeal(ctx, [mineP, a], [b])); }); });
   return out;
@@ -3135,6 +3235,8 @@ function valueRows(list, showOwner) {
   return h + '</tbody></table></div>';
 }
 function groupedValueDeals(list, showOwner) {
+  list = list.filter(function (x) { return x.ok !== false; });
+  list.forEach(function (x) { meAdj(x); });
   list = list.filter(function (x) { return bestPlayerOK(x.give, x.get); });
   var fair = list.filter(function (x) { return x.me >= 0.2 && x.ratio >= Math.max(0.9, minRatio(x.team)) && x.ratio <= 1.2; }).sort(function (a, b) { return b.me - a.me; }).slice(0, 20);
   var steal = list.filter(function (x) { return stanceOf(x.team) !== "stingy" && x.me >= 0.2 && x.ratio >= 0.8 && x.ratio < 0.9; }).sort(function (a, b) { return b.ratio - a.ratio; }).slice(0, 12);
@@ -3166,15 +3268,15 @@ function renderTradeTargets(evs) {
   var deals = [];
   cands.forEach(function (c) {
     var tv = marketValue(c.p) || 1, pkgs = ctx.mine.map(function (a) { return [a]; }).concat(pairsOf(ctx.mine)), best = null, own = ownerOf(c.p.id);
-    pkgs.forEach(function (pk) { var v = valueOf(pk), prem = pk.length > 1 ? 1.1 : 1; if (v < Math.max(0.9, minRatio(own)) * tv * prem || v > 1.25 * tv * prem) return; if (!bestPlayerOK(pk, [c.p])) return; var d = valueDeal(ctx, pk, [c.p]); if (d.me >= 0.4 && (!best || d.me > best.me + 0.05 || (Math.abs(d.me - best.me) <= 0.05 && d.vg < best.vg))) best = d; });
+    pkgs.forEach(function (pk) { if (!qbRuleOK(own, pk)) return; var v = usefulValue(own, pk, [c.p]), prem = pk.length > 1 ? 1.1 : 1; if (v < Math.max(0.9, minRatio(own)) * tv * prem || v > 1.25 * tv * prem) return; if (!bestPlayerOK(pk, [c.p])) return; var d = valueDeal(ctx, pk, [c.p]); if (!d.ok) return; if (meAdj(d) >= 0.4 && (!best || meAdj(d) > meAdj(best) + 0.05 || (Math.abs(meAdj(d) - meAdj(best)) <= 0.05 && d.vg < best.vg))) best = d; });
     if (best) deals.push(best);
   });
-  deals.sort(function (a, b) { return b.me - a.me; });
+  deals.sort(function (a, b) { return meAdj(b) - meAdj(a); });
   renderTradeTargets.last = deals.slice(0, 20);
   if (!deals.length) h += '<div class="empty" style="margin-top:10px">No value-fair upgrade found. Your surplus does not carry enough trade value to land an upgrade without overpaying.' + (state.teams.length ? '' : ' Try the Trades tab for lopsided or overpay options.') + '</div>';
   else {
-    h += '<div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Target</th>' + (state.teams.length ? '<th>Owner</th>' : '') + '<th>Realistic offer from you</th><th class="num" title="Trade value sent → received">Value</th><th class="num" title="Change in your projected best lineup per week, Weeks ' + CUR + '–' + ROS_END + '">You gain</th><th></th></tr></thead><tbody>';
-    renderTradeTargets.last.forEach(function (x, i) { h += '<tr><td>' + sugName(x.get) + ' <span class="muted small">' + marketChip(x.get[0]) + '</span></td>' + (state.teams.length ? '<td>' + ownerLabel(x.team) + '</td>' : '') + '<td>' + sugName(x.give) + '</td><td class="num">' + x.vg + ' → ' + x.vr + '</td><td class="num" style="color:#0b7a5c">+' + f1(x.me) + '</td><td><button type="button" class="btn small" data-ttload="' + i + '">Open in Trades</button></td></tr>'; });
+    h += '<div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Target</th>' + (state.teams.length ? '<th>Owner</th>' : '') + '<th>Realistic offer from you</th><th class="num" title="Trade value sent → received">Value</th><th class="num" title="Change in your projected best lineup per week, Weeks ' + CUR + '–' + ROS_END + '">You gain</th><th title="The stats behind the deal">Why</th><th></th></tr></thead><tbody>';
+    renderTradeTargets.last.forEach(function (x, i) { h += '<tr><td>' + sugName(x.get) + ' <span class="muted small">' + marketChip(x.get[0]) + '</span></td>' + (state.teams.length ? '<td>' + ownerLabel(x.team) + '</td>' : '') + '<td>' + sugName(x.give) + '</td><td class="num">' + Math.round(x.vg) + ' → ' + Math.round(x.vr) + '</td><td class="num" style="color:#0b7a5c">+' + f1(x.me) + '</td>' + whyCell(x) + '<td><button type="button" class="btn small" data-ttload="' + i + '">Open in Trades</button></td></tr>'; });
     h += '</tbody></table></div>';
   }
   return h + '</details>';
@@ -3262,7 +3364,7 @@ function tradeChart(mine, after, partner) {
 }
 function upgradeOptions(pos, horizon) {
   var ctx = tradeCtx(), pool = (state.teams.length ? leaguePool() : poolPlayers()).filter(function (p) { return p.pos === pos; });
-  var from = horizon === "po" ? 15 : 10, to = ROS_END, nW = to - from + 1;
+  var from = horizon === "po" ? 15 : CUR, to = ROS_END, nW = to - from + 1;
   var metric = function (players) { return horizon === "po" ? lineupSum(players, from, to) : teamTotals(players).total; };
   var norm = horizon === "po" ? nW : ctx.wsum, base = metric(ctx.myAll);
   var cands = pool.map(function (p) { return { p: p, add: (metric(ctx.myAll.concat([p])) - base) / norm }; }).filter(function (x) { return x.add >= 0.5; }).sort(function (a, b) { return b.add - a.add; }).slice(0, 25);
@@ -3272,18 +3374,19 @@ function upgradeOptions(pos, horizon) {
     pkgs.forEach(function (pk) {
       if (pk.some(function (q) { return q.id === c.p.id; })) return;
       var owner = ownerOf(c.p.id), them = null;
-      var v = mval(pk), prem = pk.length > 1 ? 1.1 : 1; if (v < minRatio(owner) * tv * prem || v > 1.35 * tv * prem) return;
+      if (!qbRuleOK(owner, pk)) return;
+      var v = usefulValue(owner, pk, [c.p]), prem = pk.length > 1 ? 1.1 : 1; if (v < minRatio(owner) * tv * prem || v > 1.35 * tv * prem) return;
       if (!bestPlayerOK(pk, [c.p])) return;
       var gIds = {}; pk.forEach(function (q) { gIds[q.id] = 1; });
       var afterP = ctx.myAll.filter(function (q) { return !gIds[q.id]; }).concat([c.p]), me = (metric(afterP) - base) / norm;
-      if (me < 0.4) return;
+      if (me - depthPenalty(pk, [c.p]) < 0.4) return;
       if (owner) { var th = teamPlayers(owner), rIds = { }; rIds[c.p.id] = 1; var thAfter = th.filter(function (q) { return !rIds[q.id]; }).concat(pk); them = (teamTotals(thAfter).total - teamTotals(th).total) / ctx.wsum; if (stanceOf(owner) === "stingy" && them < 0) return; }
-      out.push({ team: owner, give: pk, get: [c.p], me: me, them: them, vg: v, vr: tv, ratio: (v / tv) / prem });
+      out.push({ team: owner, give: pk, get: [c.p], me: me, them: them, vg: v, vr: tv, ratio: (v / tv) / prem, sig: dealSignal(pk, [c.p]) });
     });
   });
-  out.sort(function (a, b) { return b.me - a.me; });
+  out.sort(function (a, b) { return (meAdj(b) + 0.15 * b.sig.score) - (meAdj(a) + 0.15 * a.sig.score); });
   var seen = {}, dedup = [];
-  out.forEach(function (x) { var k = x.get[0].id; if ((seen[k] || 0) < 4) { seen[k] = (seen[k] || 0) + 1; dedup.push(x); } });
+  out.forEach(function (x) { var k = x.get[0].id; if ((seen[k] || 0) < 3) { seen[k] = (seen[k] || 0) + 1; dedup.push(x); } });
   return dedup.slice(0, 24);
 }
 /* ---------- QUICK COMPARE (players only, no rosters) ---------- */
@@ -4139,7 +4242,7 @@ function renderHistOppTab() {
     var order = { QB: 0, RB: 1, WR: 2, TE: 3 };
     mine.sort(function (a, b) { return (order[a.pos] - order[b.pos]) || (scoredPpg(b) - scoredPpg(a)); });
     if (!mine.some(function (q) { return q.id === pid; })) { pid = mine[0].id; p = playerById(pid); }
-    h += '<div class="rostergrid" style="margin-top:10px">' + mine.map(function (q) { var o = SCHEDULE[q.team] ? SCHEDULE[q.team][CUR - 1] : null, hv = o && HIST[q.id] ? HIST[q.id].filter(function (g) { return g[2] === o; }) : []; var avg = hv.length ? hv.reduce(function (a, g) { return a + g[3]; }, 0) / hv.length : null; return '<button type="button" class="rchip" data-hopick="' + esc(q.id) + '" style="cursor:pointer;' + (q.id === pid ? 'outline:2px solid var(--accent);' : '') + '">' + posBadge(q.pos) + '<span class="pn">' + esc(q.name) + ' ' + teamBadge(q.team) + '</span> <span class="muted small">' + (o ? 'vs ' + esc(o) + (avg != null ? ' · ' + f1(avg) + ' avg in ' + hv.length : ' · no history') : 'bye') + '</span></button>'; }).join("") + '</div>';
+    h += '<div class="rostergrid" style="margin-top:10px">' + mine.map(function (q) { var o = SCHEDULE[q.team] ? SCHEDULE[q.team][CUR - 1] : null, hv = o && HIST[q.id] ? HIST[q.id].filter(function (g) { return g[2] === o; }) : []; var avg = hv.length ? hv.reduce(function (a, g) { return a + g[3]; }, 0) / hv.length : null; return '<button type="button" class="rchip" data-hopick="' + esc(q.id) + '" style="cursor:pointer;' + (q.id === pid ? 'outline:2px solid var(--accent);' : '') + '">' + posBadge(q.pos) + '<span class="pn">' + esc(q.name) + ' ' + teamBadge(q.team) + '</span> <span class="muted small">' + (o ? 'vs ' + esc(o) + (avg != null ? ' · ' + f1(avg) + ' pts/g in ' + hv.length + ' past game' + (hv.length === 1 ? '' : 's') : ' · no past games') : 'bye') + '</span></button>'; }).join("") + '</div>';
   }
   var groups = {}; all.forEach(function (q) { (groups[q.pos] = groups[q.pos] || []).push(q); });
   h += '<div style="width:300px;margin-top:10px' + (hoScope === "mine" ? ';display:none' : '') + '"><label for="hoSel">Player</label><select id="hoSel">' + ["QB","RB","WR","TE"].filter(function (k) { return groups[k]; }).map(function (k) { return '<optgroup label="' + k + '">' + groups[k].sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (q) { return '<option value="' + esc(q.id) + '"' + (q.id === pid ? ' selected' : '') + '>' + esc(q.name) + ' (' + q.team + ')' + (state.roster.indexOf(q.id) >= 0 ? ' ★' : '') + '</option>'; }).join("") + '</optgroup>'; }).join("") + '</select><div class="note" style="margin-top:4px">★ on your roster. Or type a name: <input type="text" id="hoFind" list="plistHO" placeholder="Search" style="width:150px;padding:5px 8px;margin-left:4px"></div></div>';
@@ -4606,7 +4709,7 @@ function renderRostersView() {
   ids.forEach(function (tid) {
     var ps = teamPlayersById(tid).slice().sort(function (a, b) { return (order[a.pos] - order[b.pos]) || (scoredPpg(b) - scoredPpg(a)); }), st = standingOf(tid), L = teamWeekLineup(tid, CUR);
     var starters = {}; (L.lineup || []).forEach(function (l) { if (l.ev) starters[l.ev.p.id] = l.slot; });
-    h += '<div class="panel" style="padding:12px' + (tid === "me" ? ';border-left:4px solid var(--accent)' : '') + '"><div class="row" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">' + esc(teamNameById(tid)) + (tid === "me" ? ' <span class="muted small">(you)</span>' : '') + '</h3><span class="muted small">' + (st.g ? st.w + '-' + st.l + (st.t ? '-' + st.t : '') : '') + ' · ' + f1(L.total) + ' proj</span></div>';
+    h += '<div class="panel" style="padding:12px' + (tid === "me" ? ';border-left:4px solid var(--accent)' : '') + '"><div class="row" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">' + esc(teamNameById(tid)) + (tid === "me" ? ' <span class="muted small">(you)</span>' : '') + '</h3><span class="muted small">' + (st.g ? st.w + '-' + st.l + (st.t ? '-' + st.t : '') : '') + ' · ' + f1(L.total) + ' projected pts</span></div>';
     h += '<table style="width:100%;margin-top:8px;font-size:13.5px"><tbody>' + ps.map(function (p) { var e = evalPlayer(p); return '<tr><td style="width:38px;padding:3px 4px" class="muted small">' + (starters[p.id] || 'BN') + '</td><td style="padding:3px 4px"><div class="name">' + posBadge(p.pos) + '<span class="pn">' + esc(p.name) + ' ' + teamBadge(p.team) + '</span>' + injTag(INJ[p.id]) + '</div></td><td style="padding:3px 4px;text-align:right" class="num">' + (e.bye ? '<span class="muted">BYE</span>' : e.final ? '<b>' + f2(e.val) + '</b>' : f1(e.proj)) + '</td></tr>'; }).join("") + '</tbody></table></div>';
   });
   h += '</div></div>';
@@ -4731,7 +4834,7 @@ function renderAbout() {
     '<li><b>Usage.</b> Snap share, backfield share and target share are measured over the last three games so role changes show up at once; season figures sit alongside. Usage tiers (the lion and dog badges) rank active players at a position by that recent workload. Players out for the season or absent from their team’s last three games are treated as inactive and left out of those rankings.</li>' +
     '<li><b>Boom and bust, floor and ceiling.</b> From each player’s weekly scores: boom rate is the share of games at 1.5× his average or more, bust rate the share under half. Floor and ceiling are his 20th and 80th percentile weeks scaled to this week’s projection; the safest and highest-ceiling lineups use them.</li>' +
     '<li><b>Lineups.</b> The best-projected lineup is the slot assignment that maximises total projection (Flex and Superflex included). Set lineups are compared with it. Win chance against an opponent comes from the two lineups’ projected totals and variances.</li>' +
-    '<li><b>Trades and waivers.</b> Every player is projected week by week to the end of the season (opponent, bye, injury timeline). A trade is graded by how much your best lineup improves over those weeks; the other side is graded on points above a replacement-level starter. Waiver suggestions pair each pickup with the drop that costs your lineup the least, protecting trade assets. Market value is a sanity check on both.</li>' +
+    '<li><b>Trades and waivers.</b> Every player is projected week by week to the end of the season (opponent, bye, injury timeline). A trade is graded by how much your best lineup improves over those weeks and how much the other team’s does. The market check counts what you send the way the other manager would use it: full value for players who start for them, less for depth, and very little for a quarterback they would not start, so a QB joins a package only when the other team’s best quarterback is weak (under 14 points a game) or the QB would add at least six points a week, a tier jump rather than a nudge; the same test applies to any QB coming back to you. Players out for the season or inactive are left out of every deal. Deals are then ranked with a stats signal (recent form against season average, usage trend, garbage-time share, remaining schedule, bust rate, availability), shown in the Why column, and the list keeps room for mid-value targets rather than only stars. Behind the scenes every deal is also judged on what it does to your roster’s depth: the strength of your next men up at each position (bench points above replacement, with byes and injury timelines built in) before and after the trade, with extra caution when two real starters go out for one player. That depth cost is subtracted from your lineup gain before a deal is filtered or ranked, so consolidation trades have to clear a higher bar, but it is not shown as a separate column. Waiver suggestions pair each pickup with the drop that costs your lineup the least, protecting trade assets.</li>' +
     '<li><b>Defense-vs-position and strength of schedule.</b> Points each defense allows per game to QB, RB, WR and TE this season; rest-of-season strength averages those over a team’s remaining opponents. The tables are recomputed as of the week being viewed when you step back in time.</li>' +
     '<li><b>NFL team tendencies.</b> Pass rate is a count of plays (not yards): the share of offensive plays that were passes, overall, in neutral script (within 7, quarters 1–3), when up or down 14+, and in the fourth quarter with a lead. Scrambles count as passes, sacks as attempts.</li>' +
     '<li><b>Game-script usage.</b> A back’s carries and targets split by score state against his team’s running-back carries and pass attempts in that state, from play-by-play.</li>' +
