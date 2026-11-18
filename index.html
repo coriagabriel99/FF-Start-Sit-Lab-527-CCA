@@ -141,7 +141,8 @@ tr.sitrow td { opacity: .92; }
 .name { font-weight: 600; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; row-gap: 2px; }
 .name .pn { white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .name .tag, .name .tm, .name .muted { flex: 0 0 auto; }
-.why { color: var(--muted); font-size: 13.5px; margin-top: 2px; max-width: 62ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.why { color: var(--muted); font-size: 13.5px; margin-top: 4px; max-width: 62ch; white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35; }
+.tablewrap td .why { white-space: normal; }
 .verdict-start { color: #0b7a5c; font-weight: 700; }
 .verdict-sit { color: #b3402f; font-weight: 700; }
 .verdict-close { color: #a06500; font-weight: 700; }
@@ -405,7 +406,7 @@ body.sheet-open { overflow: hidden; }
       <p class="sub" tabindex="0" onclick="this.classList.toggle('open')">Lineups, matchup grades, usage, trades and your whole league in one place. Week 11 (Nov. 19–23). Data as of Tuesday, Nov. 17: season averages, usage, recent form, garbage-time splits, kicker and defense scores and defense-vs-position grades run through Week 10 (nflverse); Week 10 lineups and results are in League → History and Week recap, and its projection accuracy is under Player ranks → Accuracy. Week 11 opening spreads and totals are in; the first practice reports land Wednesday and weather forecasts firm up Thursday–Friday, both of which will update the injury list and the projections. Byes: ATL, CLE, GB, LAR, NE, SEA.</p>
     </div>
   </header>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 17, 21:45</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><span class="wb-week">Week <span id="wbWeek"></span></span><span class="wb-sub" id="wbSub"></span><span class="wb-build" id="buildStamp">build Nov 18, 00:29</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -460,6 +461,7 @@ body.sheet-open { overflow: hidden; }
       <li><b>Accuracy.</b> Rebuilds each player’s pre-game projection from the data as of Week 9 (season average, last-3 form, matchup, line, weather) and compares it with his actual Week 10 score; shows mean error, bias and the share within 5 points by position, plus the biggest misses.</li>
       <li><b>Trends.</b> Usage → Trends &amp; compare lists every player’s last six games of snaps, touches or targets and points as small lines, with the change in each between his last three games and the games before, and a Compare panel that overlays any number of players on one chart (points, usage or snaps) with their floor, ceiling, boom and bust rates side by side. Each player’s details list the same six-game numbers.</li>
       <li><b>History and awards.</b> Every week moves into history automatically once all of its games are final, using the lineups set in the tool (best-projected for teams without one), and can be edited afterwards. Under League → History &amp; awards you type each week’s starters (and bench) for every team, the same way rosters are entered, and set that week’s matchups; a paste option is there too. Player ranks → By week shows every player’s actual points and usage line for any week. Points come from the real box scores in your scoring (kickers and defenses included). The awards use every week entered: best and worst manager by lineup efficiency (points started as a share of the best lineup available from starters plus bench), luckiest and unluckiest by real wins minus expected wins (each week’s share of the league a team outscored), and most points left on the bench. The records table adds median scoring: a second game each week against the league median, shown on its own and combined with head-to-head as a double-header record.</li>
+      <li><b>Past lineups.</b> My team → My lineup has a week bar; pick an earlier week to see the lineup you actually started that week as recorded in History (slot by slot, each player’s NFL opponent and points, your bench and anyone who should have started), your score against that week’s opponent and the best lineup your roster could have produced.</li>
       <li><b>Stats vs defenses.</b> Players → Stats vs defenses is 2026-only. “Man vs zone defenses” groups a player’s plays by the opponent’s coverage identity (man-heavy 22%+ man, zone-heavy under 16.5%, balanced between; Sharp Football Analysis team rates). “Blitz vs no blitz” and “defenders in the box” come from play-by-play charting (FTN via nflverse). Per-play man/zone tags for 2026 are not public yet and will replace the defense-level grouping when released.</li>
       <li><b>NFL teams.</b> Offensive tendencies from play-by-play through the last completed week: pass rate overall and in neutral script (score within 7, quarters 1–3), pass rate when up or down 14+ and in the fourth quarter with a lead, plays, yards and points per game, each against the league average, with a note tying it to this week’s Vegas line so you can judge whether a team will keep throwing or sit on a lead.</li>
       <li><b>History vs opponents.</b> Players → History vs opponents lists a player’s PPR points in every regular-season game since 2024 by opponent (nflverse), with this week’s opponent up top and upcoming opponents flagged by week, so you can see who he has feasted on and who has held him down. Games with a previous team are marked.</li>
@@ -1718,6 +1720,25 @@ function introCard() {
     '<li><b>This week’s games</b> covers the NFL slate (matchups, injuries, weather, strength of schedule), and <b>League</b> has every team’s roster, standings, head-to-head, history and awards.</li></ol>' +
     '<p class="note" style="margin-top:6px">Hover any column header for what it means. Names stay pinned while wide tables scroll. The icon legends under Usage and Player ranks explain the badges.</p></div>';
 }
+function renderPastLineup(w) {
+  var E = histWeekEntry(w)["me"], h = '';
+  var wkBtns = []; for (var k = 1; k <= CUR; k++) wkBtns.push(k);
+  h += '<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h2 style="margin:0">Week ' + w + ' lineup</h2><div class="seg" role="group" aria-label="Week">' + wkBtns.map(function (k) { var has = k < CUR ? !!histWeekEntry(k)["me"] : true; return '<button type="button" data-lw="' + k + '" aria-pressed="' + (k === w) + '"' + (has ? '' : ' title="No lineup recorded for this week"') + '>' + (k === CUR ? 'This week' : k) + (k < CUR && !has ? ' ·' : '') + '</button>'; }).join("") + '</div></div>';
+  if (!E) return h + '<div class="empty" style="margin-top:10px">No Week ' + w + ' lineup is recorded for your team. Add it under League → History &amp; awards → Edit lineups (or send me the box score).</div>';
+  var set = histOptimal(E.starters, w), best = histOptimal(E.starters.concat(E.bench || []), w);
+  // the matchup that week
+  var pairs = state.schedule[w] || [], oppId = null; pairs.forEach(function (g) { if (g[0] === "me") oppId = g[1]; else if (g[1] === "me") oppId = g[0]; });
+  var oppE = oppId ? histWeekEntry(w)[oppId] : null, oppPts = oppE ? histLineup(oppE.starters, w).pts : null;
+  h += '<div class="cmp" style="margin-top:10px"><div class="cmpcard"><div class="muted small">Your score</div><div class="big">' + f2(set.pts) + '</div><div class="note">' + (oppId ? (oppPts != null ? (set.pts > oppPts ? '<b style="color:#0b7a5c">Won</b>' : set.pts < oppPts ? '<b style="color:#b3402f">Lost</b>' : '<b>Tied</b>') + ' vs ' + esc(teamNameById(oppId)) + ' (' + f2(oppPts) + ')' : 'vs ' + esc(teamNameById(oppId)) + ' (their lineup not recorded)') : 'Opponent not set in the league schedule') + '</div></div><div class="cmpcard"><div class="muted small">Best possible from your roster</div><div class="big">' + f2(best.pts) + '</div><div class="note">' + (best.pts - set.pts > 0.05 ? f2(best.pts - set.pts) + ' left on the bench' : 'You started the best lineup') + '</div></div></div>';
+  var oppCell = function (p) { var r = (WK[p.id] || []).filter(function (x) { return x[0] === w; })[0]; var sc = SCHEDULE[p.team], o = sc ? sc[w - 1] : null, home = SCHED_HOME[p.team] ? SCHED_HOME[p.team][w - 1] : null; if (r) return (SCHED_HOME[p.team] && SCHED_HOME[p.team][w - 1] ? 'vs ' : 'at ') + teamBadge(r[5]) + esc(TEAM_NAMES[r[5]] || r[5]); if (!o) return '<span class="muted">BYE</span>'; return (home ? 'vs ' : 'at ') + teamBadge(o) + esc(TEAM_NAMES[o] || o) + ' <span class="muted small">(did not play)</span>'; };
+  var statLine = function (p) { var r = (WK[p.id] || []).filter(function (x) { return x[0] === w; })[0]; if (!r) return ''; var bits = []; if (p.pos === "QB") { if (r[6]) bits.push(r[6] + ' pass TD'); if (r[2]) bits.push(r[2] + ' car'); } else { if (r[2]) bits.push(r[2] + ' car'); if (r[4]) bits.push(r[3] + '/' + r[4] + ' rec'); } if (r[7] != null) bits.push(r[7] + '% snaps'); return bits.length ? '<div class="muted small">' + bits.join(' · ') + '</div>' : ''; };
+  h += '<div class="tablewrap" style="margin-top:12px"><table data-nosort><thead><tr><th>Slot</th><th>Player</th><th>Opponent</th><th class="num">Pts</th></tr></thead><tbody>';
+  set.lineup.forEach(function (l) { var p = l.ev && l.ev.p; h += '<tr><td><b>' + l.slot + '</b></td><td>' + (p ? '<div class="name">' + posBadge(p.pos) + '<span class="pn">' + esc(p.name) + ' ' + teamBadge(p.team) + '</span></div>' + statLine(p) : '<span class="muted">empty</span>') + '</td><td>' + (p ? oppCell(p) : '') + '</td><td class="num"><b>' + (p ? f2(l.ev.val) : '–') + '</b></td></tr>'; });
+  h += '<tr><td colspan="3"><b>Starters total</b></td><td class="num"><b>' + f2(set.pts) + '</b></td></tr>';
+  if ((E.bench || []).length) { h += '<tr><td colspan="4" class="muted small" style="background:var(--surface-2)">Bench</td></tr>'; E.bench.map(playerById).filter(Boolean).sort(function (a, b) { return (actualWeekPts(b, w) || 0) - (actualWeekPts(a, w) || 0); }).forEach(function (p) { var v = actualWeekPts(p, w), inBest = best.lineup.some(function (l) { return l.ev && l.ev.p.id === p.id; }); h += '<tr style="opacity:.85"><td class="muted">BN</td><td><div class="name">' + posBadge(p.pos) + '<span class="pn">' + esc(p.name) + ' ' + teamBadge(p.team) + '</span>' + (inBest ? '<span class="tag hot" title="Would have been in the best lineup">should have started</span>' : '') + '</div>' + statLine(p) + '</td><td>' + oppCell(p) + '</td><td class="num">' + (v == null ? '<span class="muted">–</span>' : f2(v)) + '</td></tr>'; }); }
+  h += '</tbody></table></div><p class="note" style="margin-top:8px">Lineups come from League → History (box scores for Weeks 1–' + (CUR - 1) + '); points are the official box-score totals in your scoring. Opponent shown is the NFL team each player faced that week.</p>';
+  return h;
+}
 function renderLineup() {
   var el = $("#tab-lineup"), all = allPlayers();
   var evs = state.roster.map(playerById).filter(Boolean).map(evalPlayer);
@@ -1839,6 +1860,9 @@ function renderLineup() {
   var sub = (state.lineupSub === "stats" ? "lineup" : state.lineupSub) || "lineup", SUBS = [["lineup", "Lineup"], ["roster", "Roster & settings"], ["waivers", "Waiver wire"], ["byes", "Bye planner"], ["targets", "Trades to target"], ["compare", "Who should I start?"]];
   h = introCard() + '<div class="seg league-sub" role="tablist" aria-label="My lineup sections" style="margin-bottom:12px">' + SUBS.map(function (x) { return '<button type="button" role="tab" data-lnsub="' + x[0] + '" aria-pressed="' + (sub === x[0]) + '" aria-selected="' + (sub === x[0]) + '">' + x[1] + '</button>'; }).join("") + '</div>';
   if (!state.roster.length && sub !== "roster") h += '<div class="empty" style="margin-bottom:12px">Your roster is empty. <button class="btn small" type="button" id="goRoster" style="margin-left:8px">Build your roster</button></div>';
+  var lw = state.lineupWeek && state.lineupWeek < CUR ? state.lineupWeek : CUR;
+  if (sub === "lineup" && lw < CUR) { el.innerHTML = h + '<div class="panel">' + renderPastLineup(lw) + '</div>'; Array.prototype.forEach.call(el.querySelectorAll("[data-lnsub]"), function (b) { b.onclick = function () { state.lineupSub = b.getAttribute("data-lnsub"); save(); renderLineup(); }; }); Array.prototype.forEach.call(el.querySelectorAll("[data-lw]"), function (b) { b.onclick = function () { state.lineupWeek = parseInt(b.getAttribute("data-lw"), 10); renderLineup(); }; }); var gr0 = $("#goRoster"); if (gr0) gr0.onclick = function () { state.lineupSub = "roster"; save(); renderLineup(); }; return; }
+  if (sub === "lineup") { var wb = []; for (var k3 = 1; k3 <= CUR; k3++) wb.push(k3); h += '<div class="row" style="justify-content:flex-end;margin-bottom:8px"><div class="seg" role="group" aria-label="Week"><span class="muted small" style="padding:6px 8px">Week</span>' + wb.map(function (k) { var has = k < CUR ? !!histWeekEntry(k)["me"] : true; return '<button type="button" data-lw="' + k + '" aria-pressed="' + (k === CUR) + '"' + (has ? '' : ' title="No lineup recorded for this week"') + '>' + (k === CUR ? 'This week' : k) + '</button>'; }).join("") + '</div></div>'; }
   h += sub === "roster" ? hRoster : sub === "waivers" ? hWaivers : sub === "byes" ? renderByePlanner() : sub === "targets" ? hTargets : sub === "compare" ? hCompare : hLineup;
   h = h.replace(/<div class="panel" style="margin-top:14px">/g, '<div class="panel">');
   el.innerHTML = h; bindLineup(); renderCompare();
@@ -4611,7 +4635,7 @@ function teamWeekLineup(tid, w) {
 }
 function allTeamIds() { return ["me"].concat(state.teams.map(function (t) { return t.id; })); }
 function renderSchedule(mine) {
-  var w = state.schWeek || 10, ids = allTeamIds(), known = {}; ids.forEach(function (id) { known[id] = 1; });
+  var w = state.schWeek || CUR, ids = allTeamIds(), known = {}; ids.forEach(function (id) { known[id] = 1; });
   var games = (state.schedule[w] || []).map(function (g) { return [known[g[0]] ? g[0] : "", known[g[1]] ? g[1] : ""]; }), full = games.map(function (g, i) { return { g: g, i: i }; }).filter(function (x) { return x.g[0] && x.g[1]; });
   var selIdx = state.schSel[w]; if (selIdx == null || !games[selIdx] || !games[selIdx][0] || !games[selIdx][1]) { var mineG = full.filter(function (x) { return x.g[0] === "me" || x.g[1] === "me"; })[0]; selIdx = mineG ? mineG.i : (full[0] ? full[0].i : -1); }
   var h = '<div class="panel"><div class="row" style="justify-content:space-between"><div><h2>League schedule</h2><p class="note">Pick a week, tap a matchup to open it. Every slot in the open matchup is a dropdown, so you can set what each manager actually starts; a ✎ marks a team you set. Week ' + CUR + ' edits are shared with Head-to-head.</p></div>';
@@ -4882,7 +4906,7 @@ function renderNav(t) {
 }
 state.lastTab = state.lastTab || {};
 Array.prototype.forEach.call(document.querySelectorAll("#groupNav button"), function (b) { b.onclick = function () { var g = GROUPS.filter(function (x) { return x.id === b.getAttribute("data-group"); })[0]; showTab(state.lastTab[g.id] || g.tabs[0][0]); }; });
-document.addEventListener("click", function (e) { if (e.target && e.target.id === "introHide") { state.introHide = true; save(); renderLineup(); } });
+document.addEventListener("click", function (e) { if (e.target && e.target.id === "introHide") { state.introHide = true; save(); renderLineup(); } var lwb = e.target && e.target.closest && e.target.closest("#tab-lineup [data-lw]"); if (lwb) { state.lineupWeek = parseInt(lwb.getAttribute("data-lw"), 10); renderLineup(); } });
 var SHEET_MAX = 720;
 function openSheet(title, html) {
   var old = document.getElementById("sheet"); if (old) old.remove();
