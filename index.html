@@ -641,7 +641,7 @@ body:not(.cfg) #tab-lineup [aria-label="My lineup sections"], body:not(.cfg) #ta
     </div>
   </header>
   <div id="viewNote" class="panel" hidden style="margin-bottom:8px;border-left:4px solid var(--accent);padding:8px 12px;font-size:13.5px"></div>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="changeTeamBtn" style="margin-left:auto;display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 19, 17:41</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="changeTeamBtn" style="margin-left:auto;display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 19, 17:55</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -2771,7 +2771,7 @@ function renderTrade() {
     h += ptable("You send", give.length ? give : []) + ptable("You receive", get.length ? get : []);
 
     h += '<div class="panel" style="margin-top:14px"><h3>' + (partner ? 'Both lineups, week by week' : 'Your lineup, week by week') + '</h3><div class="tablewrap"><table data-nosort><thead><tr><th></th>';
-    for (var k = 10; k <= ROS_END; k++) h += '<th class="num">Wk ' + k + '</th>';
+    for (var k = CUR; k <= ROS_END; k++) h += '<th class="num">Wk ' + k + '</th>';
     h += '</tr></thead><tbody><tr><td>Before</td>' + b.per.map(function (v) { return '<td class="num">' + f1(v) + '</td>'; }).join("") + '</tr><tr><td>After</td>' + a.per.map(function (v) { return '<td class="num">' + f1(v) + '</td>'; }).join("") + '</tr><tr><td><b>Change</b></td>' +
       a.per.map(function (v, i) { var d = v - b.per[i]; return '<td class="num" style="color:' + (d >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (d >= 0 ? '+' : '−') + f1(Math.abs(d)) + '</td>'; }).join("") + '</tr>' +
       (pb ? '<tr><td colspan="' + (a.per.length + 1) + '" class="muted small" style="padding-top:12px">' + esc(partner.name) + '</td></tr><tr><td>Before</td>' + pb.per.map(function (v) { return '<td class="num">' + f1(v) + '</td>'; }).join("") + '</tr><tr><td>After</td>' + pa.per.map(function (v) { return '<td class="num">' + f1(v) + '</td>'; }).join("") + '</tr><tr><td><b>Change</b></td>' + pa.per.map(function (v, i) { var d = v - pb.per[i]; return '<td class="num" style="color:' + (d >= 0 ? '#0b7a5c' : '#b3402f') + '">' + (d >= 0 ? '+' : '−') + f1(Math.abs(d)) + '</td>'; }).join("") + '</tr>' : '') +
@@ -5669,7 +5669,7 @@ function renderSchedule(mine) {
   h += '</div>';
   // my season
   var rows = [];
-  for (var k = 10; k <= ROS_END; k++) {
+  for (var k = CUR; k <= ROS_END; k++) {
     var gm = (state.schedule[k] || []).filter(function (gg) { return gg[0] === "me" || gg[1] === "me"; })[0];
     if (!gm) { rows.push('<tr><td>Week ' + k + '</td><td class="muted" colspan="5">No opponent set</td></tr>'); continue; }
     var oppId = gm[0] === "me" ? gm[1] : gm[0]; if (!oppId) { rows.push('<tr><td>Week ' + k + '</td><td class="muted" colspan="5">Opponent not picked</td></tr>'); continue; }
@@ -5704,7 +5704,7 @@ function bindSchedule(el) {
   var add = $("#schAdd"); if (add) add.onclick = function () { (state.schedule[w] = state.schedule[w] || []).push(["", ""]); save(); renderLeague(); };
   var auto = $("#schAuto"); if (auto) auto.onclick = function () { var games = state.schedule[w] = state.schedule[w] || [], used = {}; games.forEach(function (g) { used[g[0]] = 1; used[g[1]] = 1; }); var free = allTeamIds().filter(function (id) { return !used[id]; }); for (var i = free.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = free[i]; free[i] = free[j]; free[j] = t; } while (free.length >= 2) games.push([free.shift(), free.shift()]); save(); renderLeague(); };
   var clr = $("#schClear"); if (clr) clr.onclick = function () { delete state.schedule[w]; save(); renderLeague(); };
-  var cp = $("#schCopy"); if (cp) cp.onclick = function () { var src = state.schedule[w] || []; for (var k = 10; k <= ROS_END; k++) if (!state.schedule[k] || !state.schedule[k].length) state.schedule[k] = src.map(function (g) { return [g[0], g[1]]; }); save(); renderLeague(); };
+  var cp = $("#schCopy"); if (cp) cp.onclick = function () { var src = state.schedule[w] || []; for (var k = CUR; k <= ROS_END; k++) if (!state.schedule[k] || !state.schedule[k].length) state.schedule[k] = src.map(function (g) { return [g[0], g[1]]; }); save(); renderLeague(); };
   Array.prototype.forEach.call(el.querySelectorAll("[data-edslot]"), function (sl) { sl.onchange = function () { var tid = state.edTeam, players = teamPlayersById(tid), map = Object.assign({}, teamWeekMap(tid, w) || manualFromOptWeek(players, w)), k = sl.getAttribute("data-edslot"), v = sl.value; Object.keys(map).forEach(function (kk) { if (map[kk] === v) delete map[kk]; }); if (v) map[k] = v; else delete map[k]; setTeamWeekMap(tid, w, map); save(); renderLeague(); }; });
   var er = $("#edReset"); if (er) er.onclick = function () { var tid = state.edTeam; if (w === CUR) setTeamWeekMap(tid, CUR, manualFromOpt(optimize(teamPlayersById(tid).map(evalPlayer)))); else setTeamWeekMap(tid, w, null); save(); renderLeague(); };
   var ed = $("#edDone"); if (ed) ed.onclick = function () { state.edTeam = ""; renderLeague(); };
@@ -5780,7 +5780,7 @@ function renderLeague() {
     var anyStand = allTeamIds().some(function (tid) { return standingOf(tid).g > 0; }), PO = playoffOddsBase();
     var ranks = allTeamIds().map(function (tid) {
       var st = standingOf(tid), pj = teamProjPerGame(tid), pf = blendFactor(tid), blend = pj * pf, pw = 0, gl = 0;
-      for (var k = 10; k <= ROS_END; k++) { var gm = (state.schedule[k] || []).filter(function (gg) { return gg[0] === tid || gg[1] === tid; })[0]; if (!gm) continue; var oid = gm[0] === tid ? gm[1] : gm[0]; if (!oid) continue; var r = adjProb(tid, oid, teamWeekLineup(tid, k), teamWeekLineup(oid, k)); pw += r.p; gl++; }
+      for (var k = CUR; k <= ROS_END; k++) { var gm = (state.schedule[k] || []).filter(function (gg) { return gg[0] === tid || gg[1] === tid; })[0]; if (!gm) continue; var oid = gm[0] === tid ? gm[1] : gm[0]; if (!oid) continue; var r = adjProb(tid, oid, teamWeekLineup(tid, k), teamWeekLineup(oid, k)); pw += r.p; gl++; }
       return { tid: tid, name: teamNameById(tid), me: tid === "me", w10: teamWeekLineup(tid, CUR).total, pj: pj, blend: blend, st: st, pw: pw, gl: gl, luck: st.g ? (st.pf - st.pa) / st.g : null };
     }).sort(function (a, b) { return b.blend - a.blend; });
     h += '<div class="panel"><h3>League power rankings</h3><p class="note">Ranked by season-adjusted projected points per game: 60% this tool’s rest-of-season projection, 40% actual points per game from the Standings you entered (projection only where no record is entered). Projected final record adds each remaining scheduled game’s win chance to the current record; it needs pairings on the League schedule.</p><div class="tablewrap" style="margin-top:8px"><table><thead><tr><th class="num">#</th><th>Team</th><th>Record</th><th class="num" title="Points for per game">PF/g</th><th class="num" title="Points against per game">PA/g</th><th class="num" title="Projected Week ' + CUR + ' fantasy points">Week ' + CUR + '</th><th class="num" title="Rest-of-season projected fantasy points per game from lineups">Proj/g</th><th class="num" title="60% projection, 40% actual scoring">Adjusted/g</th><th class="num" title="Current record plus win chances of remaining scheduled games">Proj. final</th><th class="num" title="Points for minus points against, per game">Margin/g</th><th class="num" title="Chance of finishing in a playoff spot, from 2,000 simulations of the remaining regular season">Playoff odds</th></tr></thead><tbody>' +
