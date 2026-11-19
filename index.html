@@ -631,7 +631,7 @@ body:not(.cfg) #tab-lineup [aria-label="My lineup sections"], body:not(.cfg) #ta
     </div>
   </header>
   <div id="viewNote" class="panel" hidden style="margin-bottom:8px;border-left:4px solid var(--accent);padding:8px 12px;font-size:13.5px"></div>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="changeTeamBtn" style="margin-left:auto;display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 19, 15:25</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="changeTeamBtn" style="margin-left:auto;display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 19, 15:54</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -5834,9 +5834,9 @@ if (typeof MutationObserver !== "undefined") { new MutationObserver(function (mu
 window.addEventListener("resize", scheduleFreeze);
 var GROUPS = [
   { id: "team", tabs: [["lineup:lineup", "Lineup"], ["lineup:waivers", "Waiver wire"], ["lineup:byes", "Bye planner"], ["lineup:targets", "Trades to target"], ["lineup:compare", "Who should I start?"], ["trade", "Trade finder"]] },
-  { id: "players", tabs: [["players:week", "This week"], ["players:season", "Season"], ["players:byweek", "By week"], ["pstats", "Player stats"]] },
+  { id: "players", tabs: [["players:week", "This week"], ["players:season", "Season"], ["players:byweek", "By week"], ["sos", "Strength of schedule"], ["pstats", "Player stats"]] },
   { id: "nfl", tabs: [["nfl", "Offenses"], ["defenses", "Defenses"]] },
-  { id: "week", tabs: [["matchups", "Matchups"], ["report:injuries", "Injuries"], ["report:roles", "Role changes"], ["report:weather", "Weather"], ["sos", "Strength of schedule"]] },
+  { id: "week", tabs: [["matchups", "Matchups"], ["report:injuries", "Injuries"], ["report:roles", "Role changes"], ["report:weather", "Weather"]] },
   { id: "league", tabs: [["league", "League"]] },
   { id: "ask", tabs: [["ask", "Ask"]] },
   { id: "cfg", tabs: [["cfg", "Setup"]] },
