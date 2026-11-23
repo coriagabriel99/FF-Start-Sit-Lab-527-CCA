@@ -654,7 +654,7 @@ body:not(.cfg) #tab-lineup [aria-label="My lineup sections"], body:not(.cfg) #ta
     </div>
   </header>
   <div id="viewNote" class="panel" hidden style="margin-bottom:8px;border-left:4px solid var(--accent);padding:8px 12px;font-size:13.5px"></div>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="findBtn" style="margin-left:auto" title="Find any stat, column, page or player (press /)">🔍 Find</button><button type="button" class="btn ghost small" id="changeTeamBtn" style="display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 23, 16:18</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="findBtn" style="margin-left:auto" title="Find any stat, column, page or player (press /)">🔍 Find</button><button type="button" class="btn ghost small" id="changeTeamBtn" style="display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 23, 21:50</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -1319,10 +1319,8 @@ var INJ = {
   "marvin-harrison-jr": { s: "OUT", n: "Hamstring. Ruled out for Thursday night against the Colts." },
   "woody-marks": { s: "OUT", n: "Concussion. Ruled out for Thursday night." },
   "michael-wilson": { s: "OUT", n: "Neck fracture. Out for the season." },
-  "mike-evans": { s: "QUESTIONABLE", n: "Achilles. Questionable for the 49ers in Mexico City." },
   "puka-nacua": { s: "OUT", n: "MCL surgery this week; McVay says a couple of months and the Rams are planning without him. Also serving a three-game suspension on IR." },
   "rj-harvey": { s: "OUT", n: "Knee. On injured reserve." },
-  "roman-wilson": { s: "QUESTIONABLE", n: "Hand. Questionable; also awaiting activation from injured reserve." },
   "romeo-doubs": { s: "OUT", n: "Shoulder. On injured reserve." },
   "sam-darnold": { s: "QUESTIONABLE", n: "Quad and ribs. Missed Week 10; Seattle is on bye this week." },
   "tank-bigsby": { s: "OUT", n: "Abdomen. On injured reserve." },
@@ -1331,8 +1329,8 @@ var INJ = {
   "treveyon-henderson": { s: "OUT", n: "Illness last week; Patriots are on bye." },
   "tyler-huntley": { s: "OUT", n: "Toe. Out for the season." },
   "tyrone-tracy-jr": { s: "OUT", n: "Hamstring. On injured reserve." },
-  "jonathon-brooks": { s: "QUESTIONABLE", n: "Groin. Questionable for his possible debut from injured reserve." },
-  "michael-pittman-jr": { s: "QUESTIONABLE", n: "Foot. Questionable in his first week back from injured reserve; the Steelers have to activate him Saturday." },
+  "jonathon-brooks": { s: "QUESTIONABLE", n: "Groin. Did not make his debut from injured reserve in Week 11; practice window still open." },
+  "michael-pittman-jr": { s: "QUESTIONABLE", n: "Foot. Was not activated from injured reserve for Week 11; the Steelers have two more weeks of his practice window." },
   "darren-waller": { s: "QUESTIONABLE", n: "Knee. Officially questionable after limited practices Thursday and Friday; Tommy Tremble is questionable too. Trending toward playing but check the inactives at 11:30 ET." },
   "dalton-kincaid": { s: "DOUBTFUL", n: "Thumb and ankle. Doubtful after missing practice all week; Dawson Knox and Jackson Hawes handle tight end." },
   "brock-bowers": { s: "QUESTIONABLE", n: "Ankle and quadriceps. Inactive Sunday despite practicing Thursday and Friday; week-to-week." },
@@ -1618,7 +1616,7 @@ rebuildSlate();
 
 /* ---------- STATE ---------- */
 var state = { roster: EXAMPLE_ROSTER.slice(), custom: [], slots: { QB:1, RB:2, WR:2, TE:1, FLEX:1, SF:0, K:1, DST:1 }, example: true, risk: true,
-              tab: "lineup", posFilter: "ALL", mPos: "WR", uPos: "WR", sPos: "RB", cmpA: "", cmpB: "", tGive: [], tGet: [], playoffW: true, teams: [], myName: "My team", tPartner: "", mOpp: "", scoring: { rec: 1, tep: 0, ptd: 4 }, sugTeam: "", sugMode: "fair", sugOpen: true, sugKind: "browse", sugBuy: "", sugSell: "", buyShape: "all", fq: "", fTeam: "", rStat: "proj", basis: "season", appProj: {}, lineupMode: "auto", manual: {}, combos: [], h2hMine: "best", schedule: {}, manualW: {}, schWeek: 0, edTeam: "", schView: -1, leagueSub: "rosters", schOpen: {}, schSel: {}, standings: {}, playoffSpots: 6, regEnd: 14, upPos: "RB", upHorizon: "ros", excludeLocked: true, qa: [], qb: [], lineupSub: "lineup", wvPos: "TE", wvMode: "week", chooseTeam: false, histText: {}, histWeek: 1 };
+              tab: "lineup", posFilter: "ALL", mPos: "WR", uPos: "WR", sPos: "RB", cmpA: "", cmpB: "", tGive: [], tGet: [], playoffW: true, teams: [], myName: "My team", tPartner: "", mOpp: "", scoring: { rec: 1, tep: 0, ptd: 4 }, sugTeam: "", sugMode: "fair", sugOpen: true, sugKind: "browse", sugBuy: "", sugSell: "", buyShape: "all", fq: "", fTeam: "", rStat: "proj", basis: "season", appProj: {}, lineupMode: "auto", manual: {}, combos: [], h2hMine: "best", schedule: {}, manualW: {}, schWeek: 0, edTeam: "", schView: -1, leagueSub: "rosters", schOpen: {}, schSel: {}, standings: {}, playoffSpots: 6, regEnd: 14, upPos: "RB", upHorizon: "ros", excludeLocked: false, qa: [], qb: [], lineupSub: "lineup", wvPos: "TE", wvMode: "week", chooseTeam: false, histText: {}, histWeek: 1 };
 function save() { EV_CACHE = {}; TT_CACHE = {}; ROS_CACHE = {}; WR_CACHE = {}; WP_CACHE = {}; PRED_CACHE = { key: "", res: null }; cloudSchedule(); if (CFG_MODE && !LSYNC.applying) leaguePush(false); try { localStorage.setItem("startsit-w10", JSON.stringify({ roster: state.roster, custom: state.custom, slots: state.slots, example: state.example, risk: state.risk, teams: state.teams, myName: state.myName, tPartner: state.tPartner, mOpp: state.mOpp, scoring: state.scoring, basis: state.basis, appProj: state.appProj, lineupMode: state.lineupMode, manual: state.manual, combos: state.combos, schedule: state.schedule, manualW: state.manualW, leagueSub: state.leagueSub, standings: state.standings, playoffSpots: state.playoffSpots, regEnd: state.regEnd, qa: state.qa, qb: state.qb, lineupSub: state.lineupSub, chooseTeam: state.chooseTeam, trCmp: state.trCmp, histText: state.histText, hist: state.hist, histAuto: state.histAuto, psPlayer: state.psPlayer, psBasis: state.psBasis, histSeeded: state.histSeeded, histSeedVersion: state.histSeedVersion, introHide: state.introHide, ctCurrentOnly: state.ctCurrentOnly, palette: state.palette, hoScope: state.hoScope, showInactive: state.showInactive, vdPos: state.vdPos, vdScope: state.vdScope, vdView: state.vdView, askLog: state.askLog, askKey: state.askKey, standingsVersion: state.standingsVersion, cfgSub: state.cfgSub, myTeamId: state.myTeamId, fMine: state.fMine, leagueV: state.leagueV, leagueFileV: state.leagueFileV, ir: state.ir || [], sleeperLeague: state.sleeperLeague || "" })); } catch (e) {} }
 function load() {
   try {
@@ -1763,12 +1761,15 @@ var TOP_CACHE = { key: "", ids: {} }, TAGMODE = "";
 function usageTagR(p) { return TAGMODE === "ranks" ? "" : usageTag(p); }
 function gtTagR(p) { return TAGMODE === "ranks" ? "" : gtTag(p); }
 function usageMetric(p) { var rf = recentForm(p), t = touches(p); if (p.pos === "RB") return rf ? rf.cpg + rf.rpg : (t ? t.tpg : null); return rf ? rf.tpg : targetsPerGame(p); }
+function searching() { return !!((state.fq || "").trim() || (state.vdQ || "").trim()); }
 function isInactive(p) {
   if (!p || p.pos === "DST") return false;
   var thru = OUT_THRU[p.id]; if (thru && thru >= ROS_END) return true;
   var inj = INJ[p.id]; if (inj && inj.s === "OUT" && thru && thru >= CUR + 2) return true;
   var rows = WK[p.id]; if (!rows) return false;
-  var played = {}; rows.forEach(function (r) { played[r[0]] = true; });
+  var played = {}; rows.forEach(function (r) { if (r[1] !== 0 || (r[2] || 0) + (r[4] || 0) > 0 || (r[7] || 0) > 0) played[r[0]] = true; });
+  if (ACTUAL[p.id] && ACTUAL[p.id][1] > 0) played[CUR] = true;
+  if (played[CUR]) return false;   // he played this week, so he is back whatever the recent history
   var missed = 0, checked = 0;
   for (var w = CUR - 1; w >= 1 && checked < 3; w--) { if (!SCHEDULE[p.team] || !SCHEDULE[p.team][w - 1]) continue; checked++; if (!played[w]) missed++; }
   return checked === 3 && missed === 3;
@@ -2228,7 +2229,7 @@ function bindLineup() {
 
 /* ---------- PLAYER RANKS ---------- */
 function renderSeasonRanks(el) {
-  var pos = state.posFilter, rows = allPlayers().filter(passesFilter).filter(function (p) { return (pos === "ALL" || p.pos === pos) && !p.est && (p.gp || 0) >= 1 && (state.showInactive || !isInactive(p)); });
+  var pos = state.posFilter, rows = allPlayers().filter(passesFilter).filter(function (p) { return (pos === "ALL" || p.pos === pos) && !p.est && (p.gp || 0) >= 1 && (state.showInactive || !isInactive(p) || searching()); });
   var sortKey = state.seasonSort || "avg";
   var data = rows.map(function (p) { var rf = recentForm(p), avg = scoredPpg(p), tot = avg * (p.gp || 0), ros = rosTotal(p), t = touches(p); return { p: p, avg: avg, tot: tot, rf: rf, ros: ros, t: t }; });
   data.sort(function (a, b) { return sortKey === "tot" ? b.tot - a.tot : sortKey === "ros" ? b.ros - a.ros : b.avg - a.avg; });
@@ -2332,7 +2333,7 @@ function renderUsage() {
     return (e.out ? '<span class="muted">Out</span>' : chip(e.rating)) + who;
   }
   var el = $("#tab-usage"), pos = state.uPos;
-  var rows = allPlayers().filter(passesFilter).filter(function (p) { return p.pos === pos && (USAGE[p.id] || TOUCH[p.id] || SNAP[p.id] || RZR[p.id]) && (state.showInactive || !isInactive(p)); }).map(function (p) { var e = evalPlayer(p); e.u = USAGE[p.id] || {}; return e; });
+  var rows = allPlayers().filter(passesFilter).filter(function (p) { return p.pos === pos && (USAGE[p.id] || TOUCH[p.id] || SNAP[p.id] || RZR[p.id]) && (state.showInactive || !isInactive(p) || searching()); }).map(function (p) { var e = evalPlayer(p); e.u = USAGE[p.id] || {}; return e; });
   if (pos === "RB") rows.sort(function (a, b) { var ta = touches(a.p), tb = touches(b.p); return (tb ? tb.tpg : -1) - (ta ? ta.tpg : -1); });
   else rows.sort(function (a, b) { var ta = touches(a.p), tb = touches(b.p), ca = ta && ta.recN ? ta.rpg : (ta ? ta.tpg : -1), cb = tb && tb.recN ? tb.rpg : (tb ? tb.tpg : -1); return cb - ca; });
   var h = unav + '<div class="panel"><div class="row" style="justify-content:space-between"><div><h2>Usage</h2><p class="note">' + (pos === "RB" ? 'Role numbers reflect the last three games, so a back who just inherited a backfield shows it. Backfield share is each back’s cut of his team’s running-back carries this season. Goal line is carries inside the 5 with the touchdowns they produced and the share of the team’s inside-the-5 carries (4for4, through Week 9). Sorted by touches per game.' : 'Snaps are the share of offensive snaps played. Routes per dropback divides a receiver’s routes (Next Gen Stats, through Week 8, published for about 95 players) by his team’s dropbacks per game, so 0.90 means he runs a route on 9 of 10 passing plays; for everyone else it is estimated from snap share (≈), since routes are not in public box scores. Sorted by catches per game; click any header to re-sort.') + '</p>' +
@@ -3221,7 +3222,7 @@ function renderSuggestions(partner) {
   if (!state.roster.length) return h + '<p class="note" style="margin-top:8px">Add your roster on the My lineup tab first.</p></details>';
   renderSuggestions.last = [];
   var lockedCount = allPlayers().filter(lockedNow).length;
-  if (lockedCount) h += '<div style="margin-top:8px"><label class="switch"><input type="checkbox" id="exLock"' + (state.excludeLocked !== false ? ' checked' : '') + '> Leave out players whose Week ' + CUR + ' game is already final (' + lockedCount + ' so far); most platforms lock them until the week ends</label></div>';
+  if (lockedCount) h += '<div style="margin-top:8px"><label class="switch"><input type="checkbox" id="exLock"' + (state.excludeLocked === true ? ' checked' : '') + '> Leave out players whose Week ' + CUR + ' game is already final (' + lockedCount + ' so far); most platforms lock them until the week ends</label></div>';
   h += '<div class="seg" role="group" aria-label="Suggestion kind" style="margin-top:10px">' + [["browse","Browse deals"],["buy","Buy a player"],["sell","Sell a player"],["upgrade","Upgrade a position"]].map(function (k) { return '<button type="button" data-sk="' + k[0] + '" aria-pressed="' + (state.sugKind === k[0]) + '">' + k[1] + '</button>'; }).join("") + '</div>';
   if (state.sugKind === "upgrade") {
     h += '<div class="row" style="margin-top:10px"><div><label>Position to upgrade</label><div class="seg" role="group">' + ["QB","RB","WR","TE"].map(function (ps) { return '<button type="button" data-upos="' + ps + '" aria-pressed="' + (state.upPos === ps) + '">' + ps + '</button>'; }).join("") + '</div></div><div><label>Goal</label><div class="seg" role="group"><button type="button" data-uhor="ros" aria-pressed="' + (state.upHorizon !== "po") + '">Rest of season (Weeks ' + CUR + '–' + ROS_END + ')</button><button type="button" data-uhor="po" aria-pressed="' + (state.upHorizon === "po") + '">Fantasy playoffs (Weeks 15–17)</button></div></div></div>';
@@ -3303,7 +3304,7 @@ function pairsOf(arr) { var out = []; for (var i = 0; i < arr.length; i++) for (
 function triplesOf(arr) { var out = []; for (var i = 0; i < arr.length; i++) for (var j = i + 1; j < arr.length; j++) for (var k = j + 1; k < arr.length; k++) out.push([arr[i], arr[j], arr[k]]); return out; }
 function lockedNow(p) { return !!(p && ACTUAL[p.id]); }
 function onIR(p) { return (state.ir || []).indexOf(p.id) >= 0; }
-function tradeable(p) { return SKILL[p.pos] && !onIR(p) && !(state.excludeLocked !== false && lockedNow(p)) && !isInactive(p) && !(INJ[p.id] && INJ[p.id].s === "OUT" && OUT_THRU[p.id] && OUT_THRU[p.id] >= ROS_END); }
+function tradeable(p) { return SKILL[p.pos] && !onIR(p) && !(state.excludeLocked === true && lockedNow(p)) && !isInactive(p) && !(INJ[p.id] && INJ[p.id].s === "OUT" && OUT_THRU[p.id] && OUT_THRU[p.id] >= ROS_END); }
 function lockTag(p) { return lockedNow(p) ? '<span class="tag wx" title="His Week ' + CUR + ' game is final, so most platforms lock him until the week ends (Tuesday). A trade can be proposed now but would process next week.">Locked</span>' : ''; }
 function tradeCtx() {
   var myAll = state.roster.map(playerById).filter(Boolean);
@@ -4217,7 +4218,7 @@ function trendChart(players, metric) {
 }
 function renderTrends(el) {
   var pos = state.uPos, metric = state.trMetric || "points";
-  var rows = allPlayers().filter(passesFilter).filter(function (p) { return p.pos === pos && WK[p.id] && WK[p.id].length >= 3 && (state.showInactive || !isInactive(p)); }).map(function (p) { return { p: p, pts: trendShift(p, "points"), use: trendShift(p, "usage"), snap: trendShift(p, "snaps") }; });
+  var rows = allPlayers().filter(passesFilter).filter(function (p) { return p.pos === pos && WK[p.id] && WK[p.id].length >= 3 && (state.showInactive || !isInactive(p) || searching()); }).map(function (p) { return { p: p, pts: trendShift(p, "points"), use: trendShift(p, "usage"), snap: trendShift(p, "snaps") }; });
   rows.sort(function (a, b) { return ((b.use && b.use.d) || -99) - ((a.use && a.use.d) || -99); });
   var h = '<div class="panel"><div class="row" style="justify-content:space-between"><div><h2>Trends</h2><p class="note">Who is rising and who is fading. Each line covers the player’s last six games; the change columns compare his last three games with everything before them. Sorted by the change in ' + (pos === "RB" ? 'touches' : 'targets') + '; click any header to re-sort.</p></div>';
   h += '<div class="row" style="gap:10px;align-items:center;flex-wrap:wrap">' + mineSwitch().replace('margin:8px 0', 'margin:0') + '<div class="seg" role="group" aria-label="Position">' + ["RB","WR","TE"].map(function (ps) { return '<button type="button" data-up="' + ps + '" aria-pressed="' + (pos === ps) + '">' + ps + '</button>'; }).join("") + '</div></div></div>';
@@ -4886,7 +4887,7 @@ function renderVsDef() {
   var vq = (state.vdQ || "").trim().toLowerCase(), vt = state.vdTeam || "";
   h += '<div class="row filterbar" style="margin-top:8px;align-items:flex-end;gap:10px"><div class="grow" style="max-width:300px"><label for="vdq">Find a player</label><input type="search" id="vdq" placeholder="Type a name" value="' + esc(state.vdQ || "") + '" autocomplete="off"></div><div style="width:200px"><label for="vdt">Team</label><select id="vdt"><option value="">All teams</option>' + Object.keys(TEAM_NAMES).sort().map(function (t) { return '<option value="' + t + '"' + (vt === t ? ' selected' : '') + '>' + t + ' · ' + esc(TEAM_NAMES[t]) + '</option>'; }).join("") + '</select></div>' + ((vq || vt) ? '<button class="btn ghost small" type="button" id="vdclr">Clear</button>' : '') + '</div>';
   if (vq || vt) scope = "all";   // a search or team filter looks across every player
-  var players = allPlayers().filter(function (p) { return p.pos === pos && SPLIT26[p.id] && (scope === "all" || state.roster.indexOf(p.id) >= 0) && (state.showInactive || !isInactive(p)) && (!vt || p.team === vt) && (!vq || p.name.toLowerCase().indexOf(vq) >= 0); });
+  var players = allPlayers().filter(function (p) { return p.pos === pos && SPLIT26[p.id] && (scope === "all" || state.roster.indexOf(p.id) >= 0) && (state.showInactive || !isInactive(p) || searching()) && (!vt || p.team === vt) && (!vq || p.name.toLowerCase().indexOf(vq) >= 0); });
   var bl = ' style="border-left:2px solid var(--line)"';
   var passCells = function (v) { if (!v || !v[4]) return '<td class="num" colspan="6"' + bl + '><span class="na">no plays</span></td>'; return '<td class="num"' + bl + '>' + v[4] + '</td><td class="num">' + v[5] + ' <span class="muted small">' + Math.round(v[5] / v[4] * 100) + '%</span></td><td class="num">' + v[6] + '</td><td class="num">' + f1(v[6] / v[4]) + '</td><td class="num">' + v[7] + '</td><td class="num">' + v[8] + '</td>'; };
   var recCells = function (v) { if (!v || !v[0]) return '<td class="num" colspan="5"' + bl + '><span class="na">no targets</span></td>'; return '<td class="num"' + bl + '>' + v[0] + '</td><td class="num">' + v[1] + '</td><td class="num">' + v[2] + '</td><td class="num">' + f1(v[2] / v[0]) + '</td><td class="num">' + v[3] + '</td>'; };
@@ -5413,7 +5414,7 @@ function renderGsUsage(el) {
   var h = '<div class="panel"><h2>Game-script usage (running backs)</h2><p class="note">How a back’s workload changes with the score, this season (play-by-play through Week ' + (CUR - 1) + '). Each block is a game state: <b>up 14+</b> (his team leading by two scores or more), <b>close</b> (within 13 either way) and <b>down 14+</b>. For each you get his carries out of the carries that went to running backs (quarterback sneaks and receiver runs are left out), his backfield share, his targets and target share, and his touches per 100 team plays. Who gets fed when a game is a blowout is a different question from who starts it: backs who close out wins show up in the “up 14+” column, pass-catching backs in “down 14+”. Snap counts by score are not published for 2026, so this uses touches rather than snaps.</p>';
   h += '<div class="row" style="margin-top:8px;align-items:flex-end;gap:10px;flex-wrap:wrap"><div class="seg" role="group" aria-label="Scope">' + [["mine", "My roster"], ["all", "All players"]].map(function (k) { return '<button type="button" data-gsscope="' + k[0] + '" aria-pressed="' + (scope === k[0]) + '">' + k[1] + '</button>'; }).join("") + '</div><div style="width:200px"><label for="gsTeam">Team</label><select id="gsTeam"><option value="">All teams</option>' + Object.keys(TEAM_NAMES).sort().map(function (t) { return '<option value="' + t + '"' + (team === t ? ' selected' : '') + '>' + t + ' · ' + esc(TEAM_NAMES[t]) + '</option>'; }).join("") + '</select></div></div>';
   if (team) scope = "all";
-  var players = allPlayers().filter(function (p) { return p.pos === pos && GS_PL[p.id] && (scope === "all" || state.roster.indexOf(p.id) >= 0) && (!team || p.team === team) && (state.showInactive || !isInactive(p)); });
+  var players = allPlayers().filter(function (p) { return p.pos === pos && GS_PL[p.id] && (scope === "all" || state.roster.indexOf(p.id) >= 0) && (!team || p.team === team) && (state.showInactive || !isInactive(p) || searching()); });
   var G = [["up", "Up 14 or more"], ["mid", "Close (within 13)"], ["down", "Down 14 or more"]];
   var cell = function (p, g) {
     var v = GS_PL[p.id][g], T = GS_TEAM[p.team] && GS_TEAM[p.team][g];
@@ -5586,13 +5587,13 @@ function renderPredictions() {
 }
 /* ---------- SPLITS (home/away, dome/outdoors, grass/turf, primetime/day) ---------- */
 function renderSplits() {
-  var el = $("#tab-splits"), pos = state.spPos || "ALL", scope = state.spScope || (state.roster.length ? "mine" : "all"), team = state.spTeam || "";
-  if (team) scope = "all";
+  var el = $("#tab-splits"), pos = state.spPos || "ALL", scope = state.spScope || (state.roster.length ? "mine" : "all"), team = state.spTeam || "", q = (state.spQ || "").trim().toLowerCase();
+  if (team || q) scope = "all";
   var pairs = [["home", "away", "Home", "Away"], ["dome", "outdoor", "Dome", "Outdoors"], ["grass", "turf", "Grass", "Turf"], ["prime", "day", "Primetime", "Daytime"]];
-  var rows = allPlayers().filter(function (p) { return SPLITS[p.id] && SKILL[p.pos] && (pos === "ALL" || p.pos === pos) && (scope === "all" || state.roster.indexOf(p.id) >= 0) && (!team || p.team === team) && (state.showInactive || !isInactive(p)); }).sort(function (a, b) { return scoredPpg(b) - scoredPpg(a); });
+  var rows = allPlayers().filter(function (p) { return SPLITS[p.id] && SKILL[p.pos] && (pos === "ALL" || p.pos === pos) && (scope === "all" || state.roster.indexOf(p.id) >= 0) && (!team || p.team === team) && (!q || p.name.toLowerCase().indexOf(q) >= 0) && (state.showInactive || !isInactive(p) || !!q); }).sort(function (a, b) { return scoredPpg(b) - scoredPpg(a); });
   var thisWk = WKCTX[String(CUR)] || {};
   var h = '<div class="panel"><h2>Splits</h2><p class="note">Points per game this season by where and when a player played: home or away, dome or outdoors, grass or turf, primetime (Thursday, Sunday night, Monday) or daytime. Each cell shows the average and the game count; small samples are small samples. This week’s setting for each player is highlighted so you can see which side of each split he is on.</p>';
-  h += '<div class="row" style="margin-top:8px;align-items:flex-end;gap:10px;flex-wrap:wrap"><div class="seg" role="group" aria-label="Position">' + ["ALL", "QB", "RB", "WR", "TE"].map(function (k) { return '<button type="button" data-sppos="' + k + '" aria-pressed="' + (pos === k) + '">' + k + '</button>'; }).join("") + '</div><div class="seg" role="group" aria-label="Scope">' + [["mine", "My roster"], ["all", "All players"]].map(function (k) { return '<button type="button" data-spscope="' + k[0] + '" aria-pressed="' + (scope === k[0]) + '">' + k[1] + '</button>'; }).join("") + '</div><div style="width:200px"><label for="spTeam">Team</label><select id="spTeam"><option value="">All teams</option>' + Object.keys(TEAM_NAMES).sort().map(function (t) { return '<option value="' + t + '"' + (team === t ? ' selected' : '') + '>' + t + ' · ' + esc(TEAM_NAMES[t]) + '</option>'; }).join("") + '</select></div></div>';
+  h += '<div class="row" style="margin-top:8px;align-items:flex-end;gap:10px;flex-wrap:wrap"><div class="seg" role="group" aria-label="Position">' + ["ALL", "QB", "RB", "WR", "TE"].map(function (k) { return '<button type="button" data-sppos="' + k + '" aria-pressed="' + (pos === k) + '">' + k + '</button>'; }).join("") + '</div><div class="seg" role="group" aria-label="Scope">' + [["mine", "My roster"], ["all", "All players"]].map(function (k) { return '<button type="button" data-spscope="' + k[0] + '" aria-pressed="' + (scope === k[0]) + '">' + k[1] + '</button>'; }).join("") + '</div><div style="width:220px"><label for="spQ">Find a player</label><input id="spQ" type="search" placeholder="Type a name" value="' + esc(state.spQ || "") + '" autocomplete="off"></div><div style="width:200px"><label for="spTeam">Team</label><select id="spTeam"><option value="">All teams</option>' + Object.keys(TEAM_NAMES).sort().map(function (t) { return '<option value="' + t + '"' + (team === t ? ' selected' : '') + '>' + t + ' · ' + esc(TEAM_NAMES[t]) + '</option>'; }).join("") + '</select></div></div>';
   var cell = function (sp, k, on, first) { var e = sp[k], st = (first ? 'border-left:2px solid var(--line);' : '') + (on ? 'background:color-mix(in srgb, var(--accent) 16%, var(--surface));font-weight:700;' : ''); if (!e || !e[0]) return '<td class="num"' + (st ? ' style="' + st + '"' : '') + '><span class="na">–</span></td>'; return '<td class="num nw"' + (st ? ' style="' + st + '"' : '') + '>' + f1(e[1] / e[0]) + ' <span class="muted small">points per game (' + e[0] + (e[0] === 1 ? ' game' : ' games') + ')</span></td>'; };
   h += '<div class="tablewrap" style="margin-top:10px"><table><thead><tr><th rowspan="2">Player</th><th rowspan="2" title="Season average fantasy points per game, all games">Average points per game</th><th rowspan="2" title="This week: venue, roof, surface, kickoff window">This week</th>' + pairs.map(function (pr) { return '<th colspan="2" style="text-align:center;border-left:2px solid var(--line)">' + pr[2] + ' / ' + pr[3] + '</th>'; }).join("") + '</tr><tr>' + pairs.map(function (pr) { return '<th class="num" style="border-left:2px solid var(--line)" title="Points per game, ' + pr[2].toLowerCase() + '">' + pr[2] + '</th><th class="num" title="Points per game, ' + pr[3].toLowerCase() + '">' + pr[3] + '</th>'; }).join("") + '</tr></thead><tbody>';
   if (!rows.length) h += '<tr><td colspan="11"><div class="empty">No players match.</div></td></tr>';
@@ -5602,6 +5603,7 @@ function renderSplits() {
   Array.prototype.forEach.call(el.querySelectorAll("[data-sppos]"), function (b) { b.onclick = function () { state.spPos = b.getAttribute("data-sppos"); save(); renderSplits(); }; });
   Array.prototype.forEach.call(el.querySelectorAll("[data-spscope]"), function (b) { b.onclick = function () { state.spScope = b.getAttribute("data-spscope"); save(); renderSplits(); }; });
   var st = $("#spTeam"); if (st) st.onchange = function () { state.spTeam = this.value; renderSplits(); };
+  var sq = $("#spQ"); if (sq) { sq.oninput = function () { state.spQ = this.value; var pos0 = this.selectionStart; renderSplits(); var n = $("#spQ"); if (n) { n.focus(); try { n.setSelectionRange(pos0, pos0); } catch (e) {} } }; }
 }
 /* ---------- EXPECTED PLAYS this week (pace × opponent) ---------- */
 function expectedPlays(team) {
