@@ -654,7 +654,7 @@ body:not(.cfg) #tab-lineup [aria-label="My lineup sections"], body:not(.cfg) #ta
     </div>
   </header>
   <div id="viewNote" class="panel" hidden style="margin-bottom:8px;border-left:4px solid var(--accent);padding:8px 12px;font-size:13.5px"></div>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="findBtn" style="margin-left:auto" title="Find any stat, column, page or player (press /)">🔍 Find</button><button type="button" class="btn ghost small" id="changeTeamBtn" style="display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 24, 18:12</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="findBtn" style="margin-left:auto" title="Find any stat, column, page or player (press /)">🔍 Find</button><button type="button" class="btn ghost small" id="changeTeamBtn" style="display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 24, 18:53</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -3023,6 +3023,7 @@ function leagueSnapshot() {
   return { v: Date.now(), teams: teams, schedule: sched, standings: stand, hist: hist, histAuto: state.histAuto || {}, histEdited: state.histEdited || {}, slots: state.slots, scoring: state.scoring, playoffSpots: state.playoffSpots || 6, regEnd: state.regEnd || 14, custom: state.custom || [] };
 }
 function applyLeague(d) {
+  if (d && typeof PRESET === "object" && PRESET && PRESET.leagueFileVersion && d.v && d.v < PRESET.leagueFileVersion) return false;   /* a shared document older than this build is stale; the file already carries newer data */
   if (!d || !Array.isArray(d.teams) || !(d.v > (state.leagueV || 0))) return false;
   LSYNC.applying = true;
   try {
@@ -5856,8 +5857,8 @@ bindFind();
   try {
     if (PRESET && typeof PRESET === "object" && PRESET.leagueFileVersion && state.teams.length && (state.leagueFileV || 0) < PRESET.leagueFileVersion) {
       var hist = {}; Object.keys(state.hist || {}).forEach(function (w) { hist[w] = {}; Object.keys(state.hist[w]).forEach(function (k) { hist[w][k === "me" ? (state.myTeamId || "me") : k] = state.hist[w][k]; }); });
-      var fileDoc = { v: PRESET.leagueFileVersion, teams: PRESET.teams.map(function (t) { return { id: t.id, name: t.name, roster: t.roster, stance: t.stance }; }), schedule: PRESET.schedule, standings: PRESET.standings, hist: hist, histAuto: state.histAuto || {}, slots: PRESET.slots, scoring: PRESET.scoring, playoffSpots: PRESET.playoffSpots, regEnd: PRESET.regEnd, custom: state.custom || [] };
-      if (!(state.leagueV > fileDoc.v)) { var keepV = state.leagueV; applyLeague(fileDoc); state.leagueV = keepV || 0; }
+      var fileDoc = { v: PRESET.leagueFileVersion, teams: PRESET.teams.map(function (t) { return { id: t.id, name: t.name, roster: t.roster, stance: t.stance, manual: t.manual || {}, manualW: t.manualW || {}, lineupMode: t.lineupMode || "auto" }; }), schedule: PRESET.schedule, standings: PRESET.standings, hist: hist, histAuto: state.histAuto || {}, slots: PRESET.slots, scoring: PRESET.scoring, playoffSpots: PRESET.playoffSpots, regEnd: PRESET.regEnd, custom: state.custom || [] };
+      if (!(state.leagueV > fileDoc.v)) { var keepV = state.leagueV; applyLeague(fileDoc); state.leagueV = Math.max(keepV || 0, fileDoc.v); }
       state.leagueFileV = PRESET.leagueFileVersion; state.standingsVersion = PRESET.standingsVersion || state.standingsVersion; save();
       return;
     }
