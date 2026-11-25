@@ -658,11 +658,11 @@ body:not(.cfg) #tab-lineup [aria-label="My lineup sections"], body:not(.cfg) #ta
       <div class="pill">NFL Week 12 · Nov. 25–30, 2026</div><div id="cloudBadge" style="float:right;margin-top:2px"></div>
       <h1>Start/Sit Lab: Week 12</h1>
       <div id="scorebug" hidden></div>
-      <p class="sub" tabindex="0" onclick="this.classList.toggle('open')">Lineups, matchup grades, usage, trades and your whole league in one place. Week 12 (Nov. 25–30; Thanksgiving week, with games Wednesday, Thursday and Friday). Data as of Tuesday, Nov. 24: every Week 11 game is final and in the official stat feed (nflverse): season averages, usage, recent form, snaps, red-zone shares, defense-vs-position grades, splits and yards after the catch run through Week 11. Week 11 lineups and results are in League → History, Standings and Week recap, and its projection accuracy is under Players → Accuracy. Week 12 lines are the Tuesday consensus (Nov. 24), with Wednesday’s injury news in: Walker out again, Tuten did not practice, Herbert in the protocol, Rodgers benched, Dobbins suspended. Forecasts for the outdoor games come in as they firm up. No byes this week.</p>
+      <p class="sub" tabindex="0" onclick="this.classList.toggle('open')">Lineups, matchup grades, usage, trades and your whole league in one place. Week 12 (Nov. 25–30; Thanksgiving week, with games Wednesday, Thursday and Friday). Data as of Tuesday, Nov. 24: every Week 11 game is final and in the official stat feed (nflverse): season averages, usage, recent form, snaps, red-zone shares, defense-vs-position grades, splits and yards after the catch run through Week 11. Week 11 lineups and results are in League → History, Standings and Week recap, and its projection accuracy is under Players → Accuracy. Week 12 lines are the Tuesday consensus (Nov. 24), with Wednesday’s injury news in: Walker out again, Tuten did not practice, Purdy did not practice (ankle), Herbert in the protocol, Darnold expected back, Bowers back at practice, Rodgers released, Dobbins suspended. Forecasts for the outdoor games come in as they firm up. No byes this week.</p>
     </div>
   </header>
   <div id="viewNote" class="panel" hidden style="margin-bottom:8px;border-left:4px solid var(--accent);padding:8px 12px;font-size:13.5px"></div>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="findBtn" style="margin-left:auto" title="Find any stat, column, page or player (press /)">🔍 Find</button><button type="button" class="btn ghost small" id="changeTeamBtn" style="display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 25, 17:57</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="findBtn" style="margin-left:auto" title="Find any stat, column, page or player (press /)">🔍 Find</button><button type="button" class="btn ghost small" id="changeTeamBtn" style="display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 25, 20:21</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -783,8 +783,11 @@ var EXAMPLE_ROSTER = ["brock-purdy","jahmyr-gibbs","chuba-hubbard","jaylen-warre
 
 /* Injury status (Wed/Thu practice reports, Nov. 11–12). OUT, DOUBTFUL, QUESTIONABLE, LIMITED */
 var INJ = {
+  "carson-beck": { s: "OUT", n: "Back spasms. Will not practice Wednesday; Josh Johnson is on track to start again vs Washington." },
+  "a-j-brown": { s: "QUESTIONABLE", n: "Hamstring. Did not practice Wednesday for New England; Sunday at the Chargers." },
+  "brock-purdy": { s: "QUESTIONABLE", n: "Ankle. Did not practice Wednesday; Mac Jones would start Sunday vs Seattle if Purdy cannot go, a downgrade for Evans, Kittle and the passing game." },
   "omar-cooper-jr": { s: "QUESTIONABLE", n: "Ankle. Listed for Sunday at Miami." },
-  "aaron-rodgers": { s: "OUT", n: "Benched. Mason Rudolph starts Friday vs Denver." },
+  "aaron-rodgers": { s: "OUT", n: "Benched Tuesday night and released Wednesday after criticizing the coaching staff; Mason Rudolph starts Friday vs Denver." },
   "dallas-goedert": { s: "QUESTIONABLE", n: "Shin. Listed for Thursday at Dallas." },
   "j-k-dobbins": { s: "OUT", n: "Suspended for Week 12 (Friday at Pittsburgh)." },
   "kyren-williams": { s: "QUESTIONABLE", n: "Toe. Questionable for Wednesday night vs Green Bay." },
@@ -811,13 +814,13 @@ var INJ = {
   "kenneth-walker-iii": { s: "OUT", n: "Groin. Ruled out for Thanksgiving night at Buffalo, a third straight absence; practiced in a limited way Tuesday but is not ready. Emmett Johnson starts again with Jaydn Ott behind him; Walker’s next chance is Week 13." },
   "lamar-jackson": { s: "OUT", n: "Thumb surgery (fracture and dislocation). On IR." },
   "malik-willis": { s: "OUT", n: "Groin. Placed on IR; Kyle McCord starts for Miami." },
-  "marvin-harrison-jr": { s: "QUESTIONABLE", n: "Hamstring. Missed Week 11; Week 12 status comes with the first practice report (short week for Thursday’s teams)." },
-  "woody-marks": { s: "QUESTIONABLE", n: "Concussion. Missed Week 11; Week 12 status comes with the first practice report (short week for Thursday’s teams)." },
+  "marvin-harrison-jr": { s: "QUESTIONABLE", n: "Hamstring. Back at practice Wednesday for the first time in weeks; status for the Giants game open." },
+  "woody-marks": { s: "QUESTIONABLE", n: "Concussion. Back on the practice field Wednesday; could return Sunday vs Baltimore, which would cut into Montgomery." },
   "michael-wilson": { s: "OUT", n: "Neck fracture. Out for the season." },
   "puka-nacua": { s: "OUT", n: "MCL surgery this week; McVay says a couple of months and the Rams are planning without him. Also serving a three-game suspension on IR." },
   "rj-harvey": { s: "OUT", n: "Knee. On injured reserve." },
   "romeo-doubs": { s: "OUT", n: "Shoulder. On injured reserve." },
-  "sam-darnold": { s: "QUESTIONABLE", n: "Quadriceps. Macdonald is optimistic he returns Sunday at San Francisco after two games out; Drew Lock starts if not." },
+  "sam-darnold": { s: "QUESTIONABLE", n: "Quadriceps and rib. Expected to practice in full Wednesday and start Sunday at San Francisco, per Rapoport and Schefter; a lift for Smith-Njigba." },
   "tank-bigsby": { s: "OUT", n: "Abdomen. On injured reserve." },
   "terrance-ferguson": { s: "OUT", n: "Ankle. On injured reserve." },
   "terry-mclaurin": { s: "OUT", n: "Knee. Out for the season." },
@@ -825,8 +828,8 @@ var INJ = {
   "tyler-huntley": { s: "OUT", n: "Toe. Out for the season." },
   "tyrone-tracy-jr": { s: "OUT", n: "Hamstring. On injured reserve." },
   "darren-waller": { s: "QUESTIONABLE", n: "Knee. Officially questionable after limited practices Thursday and Friday; Tommy Tremble is questionable too. Trending toward playing but check the inactives at 11:30 ET." },
-  "dalton-kincaid": { s: "QUESTIONABLE", n: "Thumb and ankle. Limited on Tuesday’s report after missing Week 11; the Bills say he is recovering, Thursday night is a short turnaround." },
-  "brock-bowers": { s: "QUESTIONABLE", n: "Ankle and quadriceps. Missed Week 11 as a precaution; Kubiak is optimistic he plays Sunday night at Cleveland barring a setback in practice." },
+  "dalton-kincaid": { s: "QUESTIONABLE", n: "Thumb and ankle. Officially questionable for Thursday night vs the Chiefs after a limited practice." },
+  "brock-bowers": { s: "QUESTIONABLE", n: "Ankle and quadriceps. On the practice field Wednesday after a precautionary week off; expected to play Sunday night at Cleveland barring a setback." },
   "jordan-addison": { s: "OUT", n: "Thumb surgery. Not expected back for Week 12; O’Connell says he is progressing well." },
   "kyler-murray": { s: "QUESTIONABLE", n: "Hamstring. Missed Week 11; Week 12 status comes with the first practice report (short week for Thursday’s teams)." },
   "baker-mayfield": { s: "QUESTIONABLE", n: "Foot and right thumb. Questionable after a limited Thursday and Friday; he says he is ready, Bowles will decide Sunday. Rookie Jalon Daniels starts if he sits." },
@@ -1020,15 +1023,15 @@ var TEAM_NOTES = [
   ["LAR","Kyren Williams (toe) is questionable for Wednesday night; Blake Corum would carry more. Puka Nacua is out for months after MCL surgery; Davante Adams is on IR until about Week 13."],
   ["MIN","Jordan Addison (thumb) is out again; Kyler Murray is expected back from the hamstring with Wentz the fallback. Vikings −7 vs Atlanta."],
   ["DEN","J.K. Dobbins is suspended for Friday’s game at Pittsburgh; RJ Harvey and Jaleel McLaughlin absorb the work. Broncos −3.5, total 36.5."],
-  ["PIT","Aaron Rodgers has been benched; Mason Rudolph starts Friday vs Denver. Downgrade for Metcalf and Pittman, slight bump for Jaylen Warren’s touches."],
-  ["SEA","Sam Darnold (quad) could return Sunday at San Francisco; Macdonald is optimistic but waits on Wednesday’s practice. Drew Lock starts if not. 49ers −3."],
+  ["PIT","Aaron Rodgers was benched Tuesday and released Wednesday; Mason Rudolph starts Friday vs Denver. Downgrade for Metcalf and Pittman, slight bump for Jaylen Warren’s touches. Broncos −3.5, total 36.5."],
+  ["SEA","Sam Darnold (quad, rib) is expected to practice in full and start Sunday at San Francisco after two games out, a lift for Smith-Njigba and Kupp. 49ers −3."],
   ["NO","Juwan Johnson (hamstring) is questionable for the trip to Cincinnati (Bengals −10). Jordyn Tyson saw 2 targets Sunday after 13 the week before."],
   ["CAR","Jalen Coker is in the concussion protocol ahead of Monday night at Tampa Bay (Buccaneers −3). Waller and Tremble played through their knees Sunday."],
-  ["NE","Drake Maye is on injured reserve for the rest of the regular season; Rhamondre Stevenson is expected to miss multiple weeks. Patriots at the Chargers Sunday."],
-  ["SF","Ricky Pearsall is out for the season and Christian Kirk had meniscus surgery; Mike Evans returned with 22.9. Seahawks visit Sunday as 3-point underdogs."],
+  ["NE","A.J. Brown (hamstring) did not practice Wednesday. Drake Maye is on injured reserve for the rest of the regular season and Rhamondre Stevenson is expected to miss multiple weeks. Patriots at the Chargers Sunday, total 35.5."],
+  ["SF","Brock Purdy (ankle) did not practice Wednesday; Mac Jones starts Sunday vs Seattle if he cannot go, a downgrade for Evans and Kittle. Pearsall is out for the season and Kirk had meniscus surgery. 49ers −3."],
   ["DAL","Jake Ferguson (knee, ankle) is expected to miss multiple weeks. Thanksgiving vs the Eagles, 48.5 total."],
   ["IND","Daniel Jones was released; Anthony Richardson starts Sunday vs the Giants (Giants −6.5)."],
-  ["ARI","Josh Johnson started Sunday with Carson Beck (back) out; Beck’s status for the Commanders game is open. Commanders −7."],
+  ["ARI","Carson Beck (back spasms) will not practice Wednesday, so Josh Johnson is on track to start again vs Washington; Marvin Harrison Jr. (hamstring) returned to practice. Commanders −7."],
   ["NYJ","Omar Cooper Jr. (ankle) is listed for Sunday at Miami; Jets −3.5."]
 ];
 var INJ_LIST = [
