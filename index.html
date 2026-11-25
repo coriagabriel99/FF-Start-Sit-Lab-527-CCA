@@ -684,7 +684,7 @@ body:not(.cfg) #tab-lineup [aria-label="My lineup sections"], body:not(.cfg) #ta
     </div>
   </header>
   <div id="viewNote" class="panel" hidden style="margin-bottom:8px;border-left:4px solid var(--accent);padding:8px 12px;font-size:13.5px"></div>
-  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="findBtn" style="margin-left:auto" title="Find any stat, column, page or player (press /)">🔍 Find</button><button type="button" class="btn ghost small" id="changeTeamBtn" style="display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 25, 21:17</span></div>
+  <div id="weekBar" class="weekbar"><span class="wb-title">Start/Sit Lab</span><label class="wb-week" for="wbSel" style="display:inline-flex;align-items:center;gap:4px">Week <select id="wbSel" aria-label="Week to view"></select></label><span class="wb-sub" id="wbSub"></span><button type="button" class="btn ghost small" id="findBtn" style="margin-left:auto" title="Find any stat, column, page or player (press /)">🔍 Find</button><button type="button" class="btn ghost small" id="changeTeamBtn" style="display:none" title="Chose the wrong team? Go back to the team chooser">Change team</button><span class="wb-build" id="buildStamp">build Nov 25, 21:21</span></div>
 
   <div id="claimBox" hidden></div>
   <nav class="tabs groups" id="groupNav" role="tablist" aria-label="Main sections">
@@ -2141,9 +2141,19 @@ function renderHome() {
   h += '<div class="home-grid">';
   // lineup check
   var issues = [];
-  if (state.lineupMode === "manual" || Object.keys(state.manual || {}).length) {
-    L.lineup.forEach(function (sl) { var b = best.lineup.filter(function (x) { return x.key === sl.key; })[0]; var cur = sl.ev, alt = b && b.ev; if (!cur && alt) issues.push({ k: 'empty', t: sl.slot + ' is empty; the model would start ' + esc(alt.p.name) + ' (' + f1(alt.val) + ').' }); else if (cur && alt && cur.p.id !== alt.p.id && alt.val - cur.val > 1) issues.push({ k: 'swap', t: sl.slot + ': you have ' + esc(cur.p.name) + ' (' + f1(cur.val) + '); the model prefers ' + esc(alt.p.name) + ' (' + f1(alt.val) + ').' }); });
+  if (state.lineupMode === "manual") {
+    // compare slot by slot (QB, RB, WR, TE, FLEX, K, D/ST): which players the model would start there instead
+    var slotsSeen = {};
+    L.lineup.forEach(function (sl) { slotsSeen[sl.slot] = true; });
+    Object.keys(slotsSeen).forEach(function (slot) {
+      var setHere = L.lineup.filter(function (x) { return x.slot === slot; }), bestHere = best.lineup.filter(function (x) { return x.slot === slot; });
+      var setIds = setHere.map(function (x) { return x.ev ? x.ev.p.id : null; }), bestIds = bestHere.map(function (x) { return x.ev ? x.ev.p.id : null; });
+      var outs = setHere.filter(function (x) { return x.ev && bestIds.indexOf(x.ev.p.id) < 0; }), ins = bestHere.filter(function (x) { return x.ev && setIds.indexOf(x.ev.p.id) < 0 && eligible(slot, x.ev.p.pos); });
+      setHere.forEach(function (x) { if (!x.ev && ins.length) { var alt = ins.shift(); issues.push({ k: 'empty', t: slot + ' is empty; the model would start ' + esc(alt.ev.p.name) + ' (' + f1(alt.ev.val) + ').' }); } });
+      outs.forEach(function (x) { var alt = ins.shift(); if (alt && alt.ev.val - x.ev.val > 1) issues.push({ k: 'swap', t: slot + ': you have ' + esc(x.ev.p.name) + ' (' + f1(x.ev.val) + '); the model prefers ' + esc(alt.ev.p.name) + ' (' + f1(alt.ev.val) + ').' }); });
+    });
   }
+
   L.lineup.forEach(function (sl) { var e = sl.ev; if (!e) return; if (e.bye) issues.push({ k: 'bye', t: esc(e.p.name) + ' is on bye in your ' + sl.slot + ' slot.' }); else if (e.out) issues.push({ k: 'out', t: esc(e.p.name) + ' is out this week (' + sl.slot + ').' }); else if (e.inj && e.inj.s !== "LIMITED") issues.push({ k: 'inj', t: esc(e.p.name) + ' is ' + e.inj.s.toLowerCase() + ' (' + sl.slot + '): ' + esc(e.inj.n).slice(0, 120) + (e.inj.n.length > 120 ? '…' : '') }); });
   var soon = L.lineup.filter(function (sl) { return sl.ev && !sl.ev.final && !sl.ev.bye && !sl.ev.out && sl.ev.kickoff && /^(Wed|Thu|Fri|Sat)/.test(sl.ev.kickoff); }).map(function (sl) { return esc(sl.ev.p.name) + ' (' + esc(sl.ev.kickoff) + ')'; });
   h += '<div class="panel home-card"><h3>Lineup check</h3>' + (issues.length ? '<ul class="home-list">' + issues.map(function (x) { return '<li class="hi-' + x.k + '">' + x.t + '</li>'; }).join("") + '</ul>' : '<p class="small">Your lineup matches the model’s best lineup and everyone is cleared to play.</p>') + (soon.length ? '<p class="small"><b>Early locks:</b> ' + soon.join(', ') + '.</p>' : '') + '<div class="row" style="gap:6px;flex-wrap:wrap"><button type="button" class="btn small" data-hgo="lineup:lineup">Open lineup</button><button type="button" class="btn ghost small" data-hgo="league:h2h">Head-to-head</button><button type="button" class="btn ghost small" data-hgo="lineup:waivers">Waiver wire</button></div></div>';
